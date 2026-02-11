@@ -22,11 +22,11 @@ Sage Yang (AJ)
 
 # 🎯 Motivation and Purpose
 
-Role: We are acting as a data science consultancy firm providing tools for healthcare administrators.
+**Role:** We are a health analytics team within a public health research institute, providing decision-support tools for healthcare administrators and policymakers.
 
-Target Audience: Health care administrators and policy makers looking to understand factors that lead to specific health outcomes.
+**Target Audience:** Healthcare administrators, policy makers, public health researchers, and clinical managers who need to identify risk factors and design targeted interventions based on population health data.
 
-Problem Solved: Reducing the difficulty of interpreting high-dimensional health survey data by allowing users to identify common factors contributing to patient health status.
+**Problem Solved:** Healthcare survey data contains complex, multi-dimensional relationships that are difficult to interpret without specialized tools. Our dashboard enables users to interactively explore these relationships, identify at-risk populations, and discover actionable insights for targeted health interventions—without requiring advanced statistical expertise. By making population health patterns visible and explorable, we aim to accelerate evidence-based decision-making and improve resource allocation for vulnerable communities.
 
 # 💾 Description of the Data
 
