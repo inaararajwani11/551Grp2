@@ -16,7 +16,7 @@ Inaara Rajwani
 
 Yin-Wen Tsai (Ella)
 
-Sage Yang (AJ)
+Sage Yang
 
 # 📝 Important Project Notes
 
