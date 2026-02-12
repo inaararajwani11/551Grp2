@@ -40,7 +40,7 @@ The main panel includes: - a stacked bar chart showing the distribution of healt
 
 All plots support hover tooltips and coordinated filtering, allowing users to explore patterns and disparities interactively. The design balances analytical depth with realistic implementation scope while addressing the core research questions on health inequity.
 
-<img src="Milestone 1/AppSketch.svg" alt="Dashboard sketch" width="900"/>
+<img src="AppSketch.svg" alt="Dashboard sketch" width="900"/>
 
 ------------------------------------------------------------------------
 
