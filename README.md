@@ -65,11 +65,19 @@ Lifestyle & Behavior: Includes Physical_vigorous_act_time, weekly_alcohol, Canna
 
 # 📱 Description of App & Sketch
 
-Interface Design: The app will contain a landing page with visual distributions (bar charts, density charts) of health factors.(dashboard)
+This dashboard is designed as an interactive health equity exploration tool based on a national healthcare survey dataset. The app presents a single-page interface with a left-hand filter panel and a main visualization area containing six coordinated plot panels arranged in a 2×3 grid.
 
-Interactivity: Users can filter the display by demographics (e.g., only female patients) or by specific health metrics using dropdown menus.
+The sidebar allows users to filter the dataset by province, age range, gender, income bracket, immigrant status, and Indigenous identity. Additional toggle controls allow users to switch between key outcome variables (e.g., general health, mental health, stress level, health utility index) and behavior variables (e.g., physical activity, diet, work hours). All filters dynamically update the visualizations.
 
-Technical Stack: The dashboard is being developed in Python using Dash and Altair for interactive visualizations.
+The main panel includes:
+(1) a stacked bar chart showing the distribution of health outcomes across demographic groups;
+(2) a scatter plot exploring relationships between health behaviors and outcomes;
+(3) a heatmap showing chronic condition prevalence across socioeconomic groups;
+(4) a grouped bar chart illustrating social determinants such as food security and sense of belonging;
+(5) a bubble chart examining work stress and substance use interactions; and
+(6) a ranking panel highlighting high-risk demographic groups.
+
+All plots support hover tooltips and coordinated filtering, allowing users to explore patterns and disparities interactively. The design balances analytical depth with realistic implementation scope while addressing the core research questions on health inequity.
 
 # 🚀 Milestone Roadmap
 
