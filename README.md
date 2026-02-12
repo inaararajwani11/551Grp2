@@ -79,6 +79,8 @@ The main panel includes:
 
 All plots support hover tooltips and coordinated filtering, allowing users to explore patterns and disparities interactively. The design balances analytical depth with realistic implementation scope while addressing the core research questions on health inequity.
 
+<img src="Milestone 1/AppSketch.svg" alt="Dashboard sketch" width="900">
+
 # 🚀 Milestone Roadmap
 
 Milestone 1: Finalize scenario, dataset, target audience, and dashboard sketch.
