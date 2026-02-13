@@ -51,6 +51,14 @@ All plots support hover tooltips and coordinated filtering, allowing users to ex
 
 ------------------------------------------------------------------------
 
+## License
+
+This project is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
+
+The healthcare survey dataset was obtained from Kaggle and remains subject to its original CC BY-SA 4.0 license.
+
+---
+
 ## 🚀 Milestone Roadmap
 
 Milestone 1: Finalize scenario, dataset, target audience, and dashboard sketch.
