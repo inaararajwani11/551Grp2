@@ -1,4 +1,4 @@
-# **Group 2 Proposal**
+﻿# **Group 2 Proposal**
 
 #### Group Member: Xuanrui Qiu (Harry), Inaara Rajwani, Yin-Wen Tsai (Ella), Sage Yang
 
@@ -6,7 +6,7 @@ This project aims to analyze and visualize the Healthcare Survey Dataset to unco
 
 ------------------------------------------------------------------------
 
-## 🎯 Motivation and Purpose
+## Motivation and Purpose
 
 **Role:** We are a health analytics team within a public health research institute, providing decision-support tools for healthcare administrators and policymakers.
 
@@ -16,7 +16,7 @@ This project aims to analyze and visualize the Healthcare Survey Dataset to unco
 
 ------------------------------------------------------------------------
 
-## 💾 Description of the Data
+## Description of the Data
 
 **Data source:** Kaggle - Healthcare Survey <https://www.kaggle.com/datasets/aradhanahirapara/healthcare-survey>
 
@@ -34,25 +34,20 @@ Given the large number of columns, we will focus on a smaller set of variables t
 
 ------------------------------------------------------------------------
 
-## 🔍 Research Questions and Usage Scenarios
+## Research Questions and Usage Scenarios
 
-***Research Questions***
+***Research Questions ( 6 total)***
 
--   How do **physical activity** measures (`Total_physical_act_time`, `Physical_vigorous_act_time`) and **diet** (`Fruit_veg_con`) relate to `Stress_level` and `Mental_health_state` across `Age` and `Total_income` brackets?
--   Which **demographic and socioeconomic** factors (`Province`, `Gender`, `Aboriginal_identity`, `Immigrant`, `Edu_level`, `Food_security`, `Insurance_cover`) most strongly predict low `Health_utility_index` or poor `Gen_health_state`?
--   Does limited **insurance coverage** or **food insecurity** increase odds of unmanaged chronic conditions (`High_BP`, `Diabetic`, `Mood_disorder`, `Anxiety_disorder`) after controlling for lifestyle factors?
--   How do **Work_hours + Work_stress** interact with **substance use** (`Weekly_alcohol`, `Cannabis_use`), and what is their combined effect on `Life_satisfaction`?
--   Do provinces with lower **Sense_belonging** show higher prevalence of mood/anxiety disorders, even after adjusting for income and education?
--   How do `BMI_18_above` categories pair with `Musculoskeletal_con` and `Cardiovascular_con`, and is regular `Physical_vigorous_act_time` protective?
--   Does **Sleep_apnea** co-occur with high `Work_stress` or long `Work_hours`, and how does that affect `Health_utility_index` and `Pain_status`?
--   Does **Sense_belonging mediate** the relationship between `Food_security` and `Mental_health_state` for `Immigrant` vs non-Immigrant groups?
--   Which factors (`Age`, `Total_income`, `Insurance_cover`, `Family_doctor`) most influence whether chronic conditions are diagnosed vs potentially **under-detected** (high self-reported `Stress_level` but no recorded `High_BP`/`Diabetic`)?
+- How do `Total_physical_act_time` and `Fruit_veg_con` relate to `Stress_level` and `Mental_health_state` across `Age`, `Gender`, and `Province`?
+- Which `Age × Province × Gender` segments show the highest prevalence of key chronic conditions (`High_BP`, `Diabetic`, `Mood_disorder`, `Anxiety_disorder`), and how do their `Stress_level` profiles differ?
+- Does higher physical activity moderate the negative association between elevated `Stress_level` and `Life_satisfaction`?
+- How do `BMI_18_above` categories pair with chronic conditions and `Stress_level`, and is regular `Physical_vigorous_act_time` protective within each BMI group?
+- Which provinces or age groups combine low physical activity with poor `Mental_health_state` and lower `Life_satisfaction`, indicating priority regions for intervention?
+- Among income brackets, how do physical activity and diet together predict `Stress_level` and `Mental_health_state`, and do patterns differ by `Gender`?
 
-***Usage Scenarios***
+***Usage Scenarios (supported by current filters/plots)***
 
--   **Policy analysts** map `Province × Food_security × Insurance_cover` to surface communities where high `Stress_level` co-occurs with low access to care, guiding targeted funding.
--   **Clinic managers** use “what-if” filters (`Age`, `BMI_18_above`, `Physical_vigorous_act_time`, `Fruit_veg_con`) to flag cohorts at greatest risk for hypertension/diabetes and plan preventive outreach.
--   **Mental health leads** segment by `Sense_belonging`, `Work_stress`, and `Weekly_alcohol` to identify workplace populations needing stress-reduction and substance-use interventions.
--   **Indigenous health coordinators** compare `Aboriginal_identity` with `Insurance_cover` and `Family_doctor` to find gaps in preventive care and chronic disease follow-up.
--   **Public health evaluators** track `Food_security → Mental_health_state → Life_satisfaction` pathways by `Province` to prioritize nutrition and counseling programs.
--   **Corporate HR teams** model `Work_hours + Work_stress + Sleep_apnea` patterns to design return-to-work and workload policies that reduce burnout.
+- **Policy analysts** filter by `Province`, `Age`, and `Gender` to spot areas where low activity and high stress coincide with poorer mental health and chronic conditions.
+- **Clinic managers** use the activity and diet filters to flag cohorts with higher hypertension/diabetes prevalence and plan preventive outreach.
+- **Mental health leads** contrast stress vs life satisfaction in the bubble/scatter views to target stress-reduction programs for high-stress segments.
+- **Population health teams** compare BMI categories with chronic conditions to prioritize physical-activity interventions where risk is highest.
