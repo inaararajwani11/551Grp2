@@ -3,12 +3,14 @@ import pandas as pd
 import dash_vega_components as dvc
 from plots import behavior_outcome_scatter
 
-# Import data processing functions
-import data_processing
+# Import data processing functions (works both as script and module)
+try:
+    from . import data_processing  # when run via `python -m src.app`
+except ImportError:  # when run via `python src/app.py`
+    import data_processing
 
-# Initialize app
 app = Dash(__name__)
-server = app.server  # For deployment
+server = app.server
 
 # Load data
 try:
@@ -31,9 +33,7 @@ def vega_text(message: str, font_size: int = 16):
         "height": 450,
         "data": {"values": [{"text": message}]},
         "mark": {"type": "text", "fontSize": font_size, "align": "center", "baseline": "middle"},
-        "encoding": {
-            "text": {"field": "text"}
-        },
+        "encoding": {"text": {"field": "text"}},
     }
 
 
@@ -52,7 +52,7 @@ def apply_global_filters(
     if province and province != "All":
         filtered_df = filtered_df[filtered_df["Province"] == province]
 
-    # Age group filter (NOTE: requires Age to be real years)
+    # NOTE: your Age appears coded (1-5). Keep Age Group = All for now to avoid filtering to zero.
     if age_group and age_group != "All":
         if age_group == "12-19":
             filtered_df = filtered_df[(filtered_df["Age"] >= 12) & (filtered_df["Age"] <= 19)]
@@ -84,60 +84,32 @@ def apply_global_filters(
 app.layout = html.Div([
     html.H1(
         "Healthcare Survey Analysis Dashboard",
-        style={
-            "textAlign": "center",
-            "color": "#2c3e50",
-            "padding": "20px",
-            "margin": "0",
-            "backgroundColor": "#ecf0f1",
-        },
+        style={"textAlign": "center", "color": "#2c3e50", "padding": "20px", "margin": "0", "backgroundColor": "#ecf0f1"},
     ),
 
-    # System Status
     html.Div([
         html.H3("System Status", style={"margin": "10px 0"}),
         html.P(data_status, style={"fontSize": "14px", "margin": "5px 0"}),
         html.P("✅ App infrastructure is running!", style={"color": "green", "margin": "5px 0"}),
-    ], style={
-        "padding": "15px",
-        "border": "2px solid #3498db",
-        "margin": "20px",
-        "backgroundColor": "#ecf0f1",
-        "borderRadius": "5px",
-    }),
+    ], style={"padding": "15px", "border": "2px solid #3498db", "margin": "20px", "backgroundColor": "#ecf0f1", "borderRadius": "5px"}),
 
     html.Div([
-        # ============ LEFT SIDEBAR ============
+        # LEFT SIDEBAR
         html.Div([
-            html.H3(
-                "Global Controls",
-                style={"textAlign": "center", "color": "#2c3e50", "marginBottom": "20px"},
-            ),
+            html.H3("Global Controls", style={"textAlign": "center", "color": "#2c3e50", "marginBottom": "20px"}),
 
-            # === FILTERS SECTION ===
-            html.H4(
-                "Filters",
-                style={
-                    "color": "#34495e",
-                    "marginBottom": "15px",
-                    "borderBottom": "2px solid #95a5a6",
-                    "paddingBottom": "5px",
-                },
-            ),
+            html.H4("Filters", style={"color": "#34495e", "marginBottom": "15px", "borderBottom": "2px solid #95a5a6", "paddingBottom": "5px"}),
 
-            # Province Filter
             html.Div([
                 html.Label("Province", style={"fontWeight": "bold", "fontSize": "13px", "color": "#555"}),
                 dcc.Dropdown(
                     id="province-filter",
                     options=[{"label": p, "value": p} for p in filter_options.get("provinces", ["All"])] if data_loaded else [],
                     value="All",
-                    placeholder="Select Province...",
                     style={"marginBottom": "15px", "fontSize": "12px"},
                 ),
             ]),
 
-            # Age Group Filter
             html.Div([
                 html.Label("Age Group", style={"fontWeight": "bold", "fontSize": "13px", "color": "#555"}),
                 dcc.Dropdown(
@@ -151,187 +123,101 @@ app.layout = html.Div([
                         {"label": "65+ (Senior)", "value": "65+"},
                     ],
                     value="All",
-                    placeholder="Select Age Group...",
                     style={"marginBottom": "15px", "fontSize": "12px"},
                 ),
             ]),
 
-            # Gender Filter
             html.Div([
                 html.Label("Gender", style={"fontWeight": "bold", "fontSize": "13px", "color": "#555"}),
                 dcc.Dropdown(
                     id="gender-filter",
                     options=[{"label": g, "value": g} for g in filter_options.get("genders", ["All"])] if data_loaded else [],
                     value="All",
-                    placeholder="Select Gender...",
                     style={"marginBottom": "15px", "fontSize": "12px"},
                 ),
             ]),
 
-            # Income Filter
             html.Div([
                 html.Label("Total Income", style={"fontWeight": "bold", "fontSize": "13px", "color": "#555"}),
                 dcc.Dropdown(
                     id="income-filter",
                     options=[{"label": i, "value": i} for i in filter_options.get("incomes", ["All"])] if data_loaded else [],
                     value="All",
-                    placeholder="Select Income...",
                     style={"marginBottom": "15px", "fontSize": "12px"},
                 ),
             ]),
 
-            # Immigrant Status Filter
             html.Div([
                 html.Label("Immigrant Status", style={"fontWeight": "bold", "fontSize": "13px", "color": "#555"}),
                 dcc.Dropdown(
                     id="immigrant-filter",
                     options=[{"label": i, "value": i} for i in filter_options.get("immigrant", ["All"])] if data_loaded else [],
                     value="All",
-                    placeholder="Select Status...",
                     style={"marginBottom": "15px", "fontSize": "12px"},
                 ),
             ]),
 
-            # Aboriginal Identity Filter
             html.Div([
                 html.Label("Aboriginal Identity", style={"fontWeight": "bold", "fontSize": "13px", "color": "#555"}),
                 dcc.Dropdown(
                     id="aboriginal-filter",
                     options=[{"label": a, "value": a} for a in filter_options.get("aboriginal", ["All"])] if data_loaded else [],
                     value="All",
-                    placeholder="Select Identity...",
                     style={"marginBottom": "20px", "fontSize": "12px"},
                 ),
             ]),
 
             html.Hr(style={"margin": "20px 0", "border": "1px solid #95a5a6"}),
 
-            # === VARIABLE TOGGLES SECTION ===
-            html.H4(
-                "Variable Toggles",
-                style={
-                    "color": "#34495e",
-                    "marginBottom": "15px",
-                    "borderBottom": "2px solid #95a5a6",
-                    "paddingBottom": "5px",
-                },
-            ),
+            html.H4("Variable Toggles", style={"color": "#34495e", "marginBottom": "15px", "borderBottom": "2px solid #95a5a6", "paddingBottom": "5px"}),
 
-            # Outcome Variable
             html.Div([
                 html.Label("Outcome Variable", style={"fontWeight": "bold", "fontSize": "13px", "color": "#555"}),
                 dcc.Dropdown(
                     id="outcome-var",
-                    options=[{"label": v.replace("_", " ").title(), "value": v}
-                             for v in filter_options.get("outcome_vars", [])] if data_loaded else [],
+                    options=[{"label": v.replace("_", " ").title(), "value": v} for v in filter_options.get("outcome_vars", [])] if data_loaded else [],
                     value="Gen_health_state",
                     style={"marginBottom": "15px", "fontSize": "12px"},
                 ),
             ]),
 
-            # Behavior Variable (kept for future charts; Chart 2 is fixed by spec)
             html.Div([
                 html.Label("Behavior Variable", style={"fontWeight": "bold", "fontSize": "13px", "color": "#555"}),
                 dcc.Dropdown(
                     id="behavior-var",
-                    options=[{"label": v.replace("_", " ").title(), "value": v}
-                             for v in filter_options.get("behavior_vars", [])] if data_loaded else [],
+                    options=[{"label": v.replace("_", " ").title(), "value": v} for v in filter_options.get("behavior_vars", [])] if data_loaded else [],
                     value="Total_physical_act_time",
                     style={"marginBottom": "25px", "fontSize": "12px"},
                 ),
             ]),
 
-            # Reset Button
-            html.Button(
-                "RESET FILTERS",
-                id="reset-button",
-                n_clicks=0,
-                style={
-                    "width": "100%",
-                    "padding": "12px",
-                    "backgroundColor": "#e74c3c",
-                    "color": "white",
-                    "border": "none",
-                    "borderRadius": "5px",
-                    "cursor": "pointer",
-                    "fontSize": "14px",
-                    "fontWeight": "bold",
-                    "marginTop": "10px",
-                    "transition": "background-color 0.3s",
-                },
-            ),
-        ], style={
-            "width": "23%",
-            "float": "left",
-            "padding": "20px",
-            "backgroundColor": "#c8e6c9",
-            "minHeight": "800px",
-            "boxShadow": "2px 0 5px rgba(0,0,0,0.1)",
-        }),
+            html.Button("RESET FILTERS", id="reset-button", n_clicks=0, style={
+                "width": "100%", "padding": "12px", "backgroundColor": "#e74c3c", "color": "white",
+                "border": "none", "borderRadius": "5px", "cursor": "pointer", "fontSize": "14px", "fontWeight": "bold"
+            }),
+        ], style={"width": "23%", "float": "left", "padding": "20px", "backgroundColor": "#c8e6c9", "minHeight": "800px"}),
 
-        # ============ MAIN CHART AREA ============
+        # MAIN CHART AREA
         html.Div([
-            html.H3(
-                "Visualization Area",
-                style={"textAlign": "center", "marginBottom": "20px", "color": "#2c3e50"},
-            ),
+            html.H3("Visualization Area", style={"textAlign": "center", "marginBottom": "20px", "color": "#2c3e50"}),
 
-            # Chart 1: Health Outcome Distribution
-            html.Div([
-                dvc.Vega(id="chart1", spec={}, style={"width": "100%"}),
-            ], style={
-                "backgroundColor": "white",
-                "padding": "20px",
-                "margin": "10px",
-                "borderRadius": "5px",
-                "boxShadow": "0 2px 4px rgba(0,0,0,0.1)",
-                "minHeight": "520px",
-            }),
+            html.Div([dvc.Vega(id="chart1", spec={}, style={"width": "100%"})],
+                     style={"backgroundColor": "white", "padding": "20px", "margin": "10px", "borderRadius": "5px", "minHeight": "520px"}),
 
-            # Chart 2: Behavior × Outcome Scatter
-            html.Div([
-                dvc.Vega(id="chart2", spec={}, style={"width": "100%"}),
-            ], style={
-                "backgroundColor": "white",
-                "padding": "20px",
-                "margin": "10px",
-                "borderRadius": "5px",
-                "boxShadow": "0 2px 4px rgba(0,0,0,0.1)",
-                "minHeight": "520px",
-            }),
+            html.Div([dvc.Vega(id="chart2", spec={}, style={"width": "100%"})],
+                     style={"backgroundColor": "white", "padding": "20px", "margin": "10px", "borderRadius": "5px", "minHeight": "520px"}),
 
-            # Placeholder for future charts
-            html.Div([
-                html.Div("📊 Chart 3: Social Determinants (Coming Soon)",
-                         style={
-                             "border": "2px dashed #bdc3c7",
-                             "padding": "60px",
-                             "textAlign": "center",
-                             "color": "#95a5a6",
-                             "fontSize": "16px",
-                             "borderRadius": "5px",
-                         }),
-            ], style={"margin": "10px"}),
-
-        ], style={
-            "width": "75%",
-            "float": "right",
-            "padding": "20px",
-        }),
+        ], style={"width": "75%", "float": "right", "padding": "20px"})
     ], style={"display": "flex", "minHeight": "800px"}),
 
-    # Footer
     html.Div([
         html.P(
-            f"📊 Data Dictionary: {len(df.columns) if data_loaded else 0} variables available | "
-            f"Records: {len(df):,} after filtering" if data_loaded else "",
+            f"📊 Data Dictionary: {len(df.columns) if data_loaded else 0} variables available | Records: {len(df):,} after filtering" if data_loaded else "",
             style={"textAlign": "center", "color": "#7f8c8d", "marginTop": "20px", "fontSize": "12px"},
         )
     ], style={"clear": "both"}),
 ])
 
-
-# ============ CALLBACKS ============
 
 @app.callback(
     [Output("province-filter", "value"),
@@ -345,7 +231,6 @@ app.layout = html.Div([
     [Input("reset-button", "n_clicks")]
 )
 def reset_filters(n_clicks):
-    """Reset all filters when button is clicked"""
     return "All", "All", "All", "All", "All", "All", "Gen_health_state", "Total_physical_act_time"
 
 
@@ -360,7 +245,6 @@ def reset_filters(n_clicks):
      Input("outcome-var", "value")]
 )
 def update_chart1(province, age_group, gender, income, immigrant, aboriginal, outcome_var):
-    """Update Chart 1: Health Outcome Distribution"""
     import altair as alt
 
     if not data_loaded:
@@ -374,54 +258,12 @@ def update_chart1(province, age_group, gender, income, immigrant, aboriginal, ou
 
     chart_data = filtered_df.groupby([outcome_var, "Total_income"]).size().reset_index(name="count")
 
-    health_order = ["Excellent", "Very good", "Good", "Fair", "Poor"]
-    stress_order = ["Not at all stressful", "Not very stressful", "A bit stressful",
-                    "Quite a bit stressful", "Extremely stressful"]
-
-    if "health" in outcome_var.lower():
-        sort_order = health_order
-    elif "stress" in outcome_var.lower():
-        sort_order = stress_order
-    else:
-        sort_order = None
-
-    income_order = [
-        "Less than $20,000",
-        "$20,000 to $39,999",
-        "$40,000 to $59,999",
-        "$60,000 to $79,999",
-        "$80,000 to $99,999",
-        "$100,000 to $149,999",
-        "$150,000 or more",
-    ]
-
     chart = alt.Chart(chart_data).mark_bar().encode(
-        x=alt.X(
-            f"{outcome_var}:N",
-            title=outcome_var.replace("_", " ").title(),
-            sort=sort_order if sort_order else alt.EncodingSortField(field="count", order="descending"),
-            axis=alt.Axis(labelAngle=-45, labelLimit=200),
-        ),
-        y=alt.Y("count:Q", title="Number of Respondents", stack="zero"),
-        color=alt.Color(
-            "Total_income:N",
-            title="Income Level",
-            sort=income_order,
-            scale=alt.Scale(scheme="tableau20"),
-        ),
-        tooltip=[
-            alt.Tooltip(f"{outcome_var}:N", title=outcome_var.replace("_", " ").title()),
-            alt.Tooltip("Total_income:N", title="Income Level"),
-            alt.Tooltip("count:Q", title="Count", format=","),
-        ],
-    ).properties(
-        width=700,
-        height=450,
-        title={
-            "text": f"{outcome_var.replace('_', ' ').title()} Distribution by Income Level",
-            "subtitle": f"Total respondents: {len(filtered_df):,} | Filter: {age_group if age_group != 'All' else 'All ages'}",
-        },
-    )
+        x=alt.X(f"{outcome_var}:N", title=outcome_var.replace("_", " ").title(), axis=alt.Axis(labelAngle=-45, labelLimit=200)),
+        y=alt.Y("count:Q", title="Number of Respondents"),
+        color=alt.Color("Total_income:N", title="Income Level"),
+        tooltip=[alt.Tooltip(f"{outcome_var}:N"), alt.Tooltip("Total_income:N"), alt.Tooltip("count:Q", format=",")],
+    ).properties(width=700, height=450)
 
     return chart.to_dict()
 
@@ -436,29 +278,20 @@ def update_chart1(province, age_group, gender, income, immigrant, aboriginal, ou
      Input("aboriginal-filter", "value")]
 )
 def update_chart2(province, age_group, gender, income, immigrant, aboriginal):
-    """Update Chart 2: Behavior × Outcome scatter plot"""
     if not data_loaded:
         return vega_text("Data not loaded")
 
     filtered_df = apply_global_filters(df, province, age_group, gender, income, immigrant, aboriginal)
-
-    required_cols = ["Total_physical_act_time", "Health_utility_index", "Total_income"]
-    missing = [c for c in required_cols if c not in filtered_df.columns]
-    if missing:
-        return vega_text(f"Chart 2 missing columns: {missing}", font_size=14)
-
-    filtered_df = filtered_df.dropna(subset=required_cols)
+    filtered_df = filtered_df.dropna(subset=["Total_physical_act_time", "Health_utility_index", "Total_income"])
 
     if len(filtered_df) == 0:
         return vega_text("No data matches the current filter selection")
 
-    # Downsample for performance / avoid Altair/Vega issues with too many points
     if len(filtered_df) > 5000:
         filtered_df = filtered_df.sample(5000, random_state=42)
 
     try:
-        chart = behavior_outcome_scatter(filtered_df)
-        return chart.to_dict()
+        return behavior_outcome_scatter(filtered_df).to_dict()
     except Exception as e:
         return vega_text(f"Chart 2 error: {type(e).__name__}: {str(e)[:120]}", font_size=12)
 
