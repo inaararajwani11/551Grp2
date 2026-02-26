@@ -122,10 +122,10 @@ app.layout = html.Div([
             ], style={'margin': '10px'}),
             
             html.Div([
-                html.H4('📊 Chart 3: Food Security × Mental Health (Grouped by Immigrant Status)', 
+                html.H4('Chart 3: Social Determinants — Food Security × Mental Health (Immigrant status)', 
                         style={'marginBottom': '10px', 'color': '#2c3e50', 'textAlign': 'left'}),
                 html.Iframe(id='chart3', style={'width': '100%', 'height': '520px', 'border': 'none'}),
-                html.P('Y-axis uses the average mental health score (1 = Excellent, 5 = Poor) for each food security group, split by immigrant status.',
+                html.P('Y-axis shows the average mental health score (1 = Excellent, 5 = Poor) for each food security category, grouped by immigrant status.',
                        style={'fontSize': '12px', 'color': '#7f8c8d', 'marginTop': '8px'})
             ], style={'backgroundColor': 'white', 'padding': '20px', 'margin': '10px',
                       'borderRadius': '5px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'}),
@@ -168,10 +168,17 @@ def update_chart1(province, age_group, gender, income, immigrant, aboriginal, ou
         filtered_df = filtered_df[filtered_df['Province'] == province]
     
     if age_group and age_group != 'All':
+        # Handle both numeric ages and coded age groups (1-5)
         age_ranges = {'12-19': (12, 19), '20-34': (20, 34), '35-49': (35, 49), '50-64': (50, 64), '65+': (65, 200)}
-        if age_group in age_ranges:
-            min_age, max_age = age_ranges[age_group]
-            filtered_df = filtered_df[(filtered_df['Age'] >= min_age) & (filtered_df['Age'] <= max_age)]
+        age_code_map = {'12-19': 1, '20-34': 2, '35-49': 3, '50-64': 4, '65+': 5}
+        if 'Age' in filtered_df.columns and filtered_df['Age'].max() <= 10:
+            code = age_code_map.get(age_group)
+            if code is not None:
+                filtered_df = filtered_df[filtered_df['Age'] == code]
+        else:
+            if age_group in age_ranges:
+                min_age, max_age = age_ranges[age_group]
+                filtered_df = filtered_df[(filtered_df['Age'] >= min_age) & (filtered_df['Age'] <= max_age)]
     
     if gender and gender != 'All':
         filtered_df = filtered_df[filtered_df['Gender'] == gender]
@@ -232,9 +239,15 @@ def update_chart3(province, age_group, gender, income, immigrant, aboriginal):
 
     if age_group and age_group != 'All':
         age_ranges = {'12-19': (12, 19), '20-34': (20, 34), '35-49': (35, 49), '50-64': (50, 64), '65+': (65, 200)}
-        if age_group in age_ranges:
-            min_age, max_age = age_ranges[age_group]
-            filtered_df = filtered_df[(filtered_df['Age'] >= min_age) & (filtered_df['Age'] <= max_age)]
+        age_code_map = {'12-19': 1, '20-34': 2, '35-49': 3, '50-64': 4, '65+': 5}
+        if 'Age' in filtered_df.columns and filtered_df['Age'].max() <= 10:
+            code = age_code_map.get(age_group)
+            if code is not None:
+                filtered_df = filtered_df[filtered_df['Age'] == code]
+        else:
+            if age_group in age_ranges:
+                min_age, max_age = age_ranges[age_group]
+                filtered_df = filtered_df[(filtered_df['Age'] >= min_age) & (filtered_df['Age'] <= max_age)]
 
     if gender and gender != 'All':
         filtered_df = filtered_df[filtered_df['Gender'] == gender]
@@ -266,27 +279,55 @@ def update_chart3(province, age_group, gender, income, immigrant, aboriginal):
     available_food = [f for f in food_order if f in grouped['Food_security'].unique()]
     age_label = age_group if age_group != 'All' else 'All ages'
 
-    chart = alt.Chart(grouped).mark_bar().encode(
-        x=alt.X('Food_security:N', title='Food security status',
+    bars = (
+        alt.Chart(grouped)
+        .mark_bar(size=60)
+        .encode(
+            x=alt.X(
+                'Food_security:N',
+                title='Food security status',
                 sort=available_food if available_food else food_order,
-                axis=alt.Axis(labelAngle=-15, labelLimit=150)),
-        xOffset=alt.XOffset('Immigrant:N', title=None),
-        y=alt.Y('avg_score:Q', title='Average mental health (1 = Excellent, 5 = Poor)',
-                scale=alt.Scale(domain=[1, 5])),
-        color=alt.Color('Immigrant:N', title='Immigrant status',
-                        sort=immigrant_order, scale=alt.Scale(scheme='tableau10')),
-        tooltip=[
-            alt.Tooltip('Food_security:N', title='Food security'),
-            alt.Tooltip('Immigrant:N', title='Immigrant status'),
-            alt.Tooltip('avg_score:Q', title='Average mental health', format='.2f'),
-            alt.Tooltip('respondent_count:Q', title='Respondents', format=',')
-        ]
-    ).properties(
-        width=750, height=450,
-        title={'text': 'Mental health by food security (grouped by immigrant status)',
-               'subtitle': f'Total: {len(filtered_df):,} respondents | Filter: {age_label}'}
-    ).configure_axis(labelFontSize=11, titleFontSize=13
-    ).configure_legend(titleFontSize=12, labelFontSize=10, orient='right', offset=10)
+                axis=alt.Axis(labelAngle=0, labelLimit=240, labelPadding=10),
+                scale=alt.Scale(paddingInner=0.15, paddingOuter=0.2)
+            ),
+            xOffset=alt.XOffset('Immigrant:N', title=None),
+            y=alt.Y(
+                'avg_score:Q',
+                title='Average mental health (1 = Excellent, 5 = Poor)',
+                scale=alt.Scale(domain=[0, 5], nice=False)
+            ),
+            y2=alt.Y2(value=0),  # ensure bars start at the visible baseline
+            color=alt.Color(
+                'Immigrant:N',
+                title='Immigrant status',
+                sort=immigrant_order,
+                scale=alt.Scale(range=['#1f77b4', '#ff7f0e'])
+            ),
+            tooltip=[
+                alt.Tooltip('Food_security:N', title='Food security'),
+                alt.Tooltip('Immigrant:N', title='Immigrant status'),
+                alt.Tooltip('avg_score:Q', title='Average mental health', format='.2f'),
+                alt.Tooltip('respondent_count:Q', title='Respondents', format=',')
+            ]
+        )
+    )
+
+    baseline = alt.Chart(pd.DataFrame({'y': [0]})).mark_rule(color='#666', strokeWidth=1, opacity=0.8).encode(y='y:Q')
+
+    chart = (
+        (bars + baseline)
+        .properties(
+            width=640,
+            height=430,
+            title={
+                'text': 'Social determinants: mental health by food security (immigrant status)',
+                'subtitle': f'Total: {len(filtered_df):,} respondents | Filter: {age_label}'
+            }
+        )
+        .configure_axis(labelFontSize=11, titleFontSize=13, gridColor='#e5e7eb', gridOpacity=0.7)
+        .configure_view(strokeWidth=0)
+        .configure_legend(titleFontSize=12, labelFontSize=10, orient='right', offset=10)
+    )
 
     return chart.to_html()
 
