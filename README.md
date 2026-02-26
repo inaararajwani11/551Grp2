@@ -1,5 +1,7 @@
 # Healthcare Survey Analysis Dashboard
 
+**Deployed App:** [https://five51grp2.onrender.com/](https://five51grp2.onrender.com/)
+
 ------------------------------------------------------------------------
 
 ## 📊 Project Overview
@@ -47,7 +49,25 @@ The main panel includes:
 
 All plots support hover tooltips and coordinated filtering, allowing users to explore patterns and disparities interactively. The design balances analytical depth with realistic implementation scope while addressing the core research questions on health inequity.
 
-<img src="AppSketch.svg" alt="Dashboard sketch" width="900"/>
+<img src="doc/AppSketch.svg" alt="Dashboard sketch" width="900"/>
+
+------------------------------------------------------------------------
+
+## 🛠 How to Run Locally
+
+```bash
+# Clone the repo
+git clone https://github.com/inaararajwani11/551Grp2.git
+cd 551Grp2
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the app
+python src/app.py
+```
+
+Then open http://localhost:8050 in your browser.
 
 ------------------------------------------------------------------------
 
