@@ -207,6 +207,15 @@ app.layout = html.Div([
             html.Div([dvc.Vega(id="chart2", spec={}, style={"width": "100%"})],
                      style={"backgroundColor": "white", "padding": "20px", "margin": "10px", "borderRadius": "5px", "minHeight": "520px"}),
 
+            html.Div([
+                html.H4("Chart 3: Social Determinants — Food Security × Mental Health (Immigrant status)",
+                         style={"marginBottom": "10px", "color": "#2c3e50", "textAlign": "left"}),
+                html.Iframe(id="chart3", style={"width": "100%", "height": "520px", "border": "none"}),
+                html.P("Y-axis shows the average mental health score (1 = Excellent, 5 = Poor) for each food security category, grouped by immigrant status.",
+                       style={"fontSize": "12px", "color": "#7f8c8d", "marginTop": "8px"}),
+            ], style={"backgroundColor": "white", "padding": "20px", "margin": "10px",
+                      "borderRadius": "5px", "minHeight": "520px"}),
+
         ], style={"width": "75%", "float": "right", "padding": "20px"})
     ], style={"display": "flex", "minHeight": "800px"}),
 
@@ -294,6 +303,84 @@ def update_chart2(province, age_group, gender, income, immigrant, aboriginal):
         return behavior_outcome_scatter(filtered_df).to_dict()
     except Exception as e:
         return vega_text(f"Chart 2 error: {type(e).__name__}: {str(e)[:120]}", font_size=12)
+
+
+@app.callback(
+    Output("chart3", "srcDoc"),
+    [Input("province-filter", "value"),
+     Input("age-filter", "value"),
+     Input("gender-filter", "value"),
+     Input("income-filter", "value"),
+     Input("immigrant-filter", "value"),
+     Input("aboriginal-filter", "value")]
+)
+def update_chart3(province, age_group, gender, income, immigrant, aboriginal):
+    import altair as alt
+
+    if not data_loaded:
+        return '<html><body><h3 style="text-align:center;color:#95a5a6;">Data not loaded</h3></body></html>'
+
+    filtered_df = apply_global_filters(df, province, age_group, gender, income, immigrant, aboriginal)
+    filtered_df = filtered_df.dropna(subset=["Food_security", "Mental_health_state", "Immigrant"])
+
+    if len(filtered_df) == 0:
+        return '<html><body style="display:flex;justify-content:center;align-items:center;height:100%;"><h3 style="color:#95a5a6;">No data matches the current filter selection</h3></body></html>'
+
+    mental_score_map = {"Excellent": 1, "Very good": 2, "Good": 3, "Fair": 4, "Poor": 5}
+    filtered_df = filtered_df.copy()
+    filtered_df["Mental_health_score"] = filtered_df["Mental_health_state"].map(mental_score_map)
+
+    grouped = (
+        filtered_df
+        .groupby(["Food_security", "Immigrant"])
+        .agg(avg_score=("Mental_health_score", "mean"),
+             respondent_count=("Mental_health_state", "size"))
+        .reset_index()
+    )
+
+    food_order = ["Food secure", "Moderately food insecure", "Severely food insecure"]
+    immigrant_order = ["Yes", "No"]
+    available_food = [f for f in food_order if f in grouped["Food_security"].unique()]
+    age_label = age_group if age_group != "All" else "All ages"
+
+    bars = (
+        alt.Chart(grouped)
+        .mark_bar(size=60)
+        .encode(
+            x=alt.X("Food_security:N", title="Food security status",
+                     sort=available_food if available_food else food_order,
+                     axis=alt.Axis(labelAngle=0, labelLimit=240, labelPadding=10),
+                     scale=alt.Scale(paddingInner=0.15, paddingOuter=0.2)),
+            xOffset=alt.XOffset("Immigrant:N", title=None),
+            y=alt.Y("avg_score:Q", title="Average mental health (1 = Excellent, 5 = Poor)",
+                     scale=alt.Scale(domain=[0, 5], nice=False)),
+            y2=alt.Y2(value=0),
+            color=alt.Color("Immigrant:N", title="Immigrant status",
+                            sort=immigrant_order, scale=alt.Scale(range=["#1f77b4", "#ff7f0e"])),
+            tooltip=[
+                alt.Tooltip("Food_security:N", title="Food security"),
+                alt.Tooltip("Immigrant:N", title="Immigrant status"),
+                alt.Tooltip("avg_score:Q", title="Average mental health", format=".2f"),
+                alt.Tooltip("respondent_count:Q", title="Respondents", format=","),
+            ],
+        )
+    )
+
+    baseline = alt.Chart(pd.DataFrame({"y": [0]})).mark_rule(color="#666", strokeWidth=1, opacity=0.8).encode(y="y:Q")
+
+    chart = (
+        (bars + baseline)
+        .properties(
+            width=640, height=430,
+            title={"text": "Social determinants: mental health by food security (immigrant status)",
+                   "subtitle": f"Total: {len(filtered_df):,} respondents | Filter: {age_label}"},
+        )
+        .configure_axis(labelFontSize=11, titleFontSize=13, gridColor="#e5e7eb", gridOpacity=0.7)
+        .configure_view(strokeWidth=0)
+        .configure_legend(titleFontSize=12, labelFontSize=10, orient="right", offset=10)
+    )
+
+    return chart.to_html()
 
 
 if __name__ == "__main__":
