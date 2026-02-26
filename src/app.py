@@ -1,8 +1,11 @@
 from dash import Dash, html, dcc, Input, Output
 import pandas as pd
 
-# Import data processing functions
-import data_processing
+# Import data processing functions (works both as script and module)
+try:
+    from . import data_processing  # when run via `python -m src.app`
+except ImportError:  # when run via `python src/app.py`
+    import data_processing
 
 # Initialize app
 app = Dash(__name__)
@@ -119,10 +122,13 @@ app.layout = html.Div([
             ], style={'margin': '10px'}),
             
             html.Div([
-                html.Div('📊 Chart 3: Social Determinants (Coming Soon)', 
-                        style={'border': '2px dashed #bdc3c7', 'padding': '60px', 'textAlign': 'center',
-                               'color': '#95a5a6', 'fontSize': '16px', 'borderRadius': '5px'}),
-            ], style={'margin': '10px'}),
+                html.H4('📊 Chart 3: Food Security × Mental Health (Grouped by Immigrant Status)', 
+                        style={'marginBottom': '10px', 'color': '#2c3e50', 'textAlign': 'left'}),
+                html.Iframe(id='chart3', style={'width': '100%', 'height': '520px', 'border': 'none'}),
+                html.P('Y-axis uses the average mental health score (1 = Excellent, 5 = Poor) for each food security group, split by immigrant status.',
+                       style={'fontSize': '12px', 'color': '#7f8c8d', 'marginTop': '8px'})
+            ], style={'backgroundColor': 'white', 'padding': '20px', 'margin': '10px',
+                      'borderRadius': '5px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'}),
             
         ], style={'width': '75%', 'float': 'right', 'padding': '20px'})
     ], style={'display': 'flex', 'minHeight': '800px'}),
@@ -206,6 +212,82 @@ def update_chart1(province, age_group, gender, income, immigrant, aboriginal, ou
     ).configure_axis(labelFontSize=11, titleFontSize=13
     ).configure_legend(titleFontSize=12, labelFontSize=10, orient='right', offset=10)
     
+    return chart.to_html()
+
+@app.callback(
+    Output('chart3', 'srcDoc'),
+    [Input('province-filter', 'value'), Input('age-filter', 'value'), Input('gender-filter', 'value'),
+     Input('income-filter', 'value'), Input('immigrant-filter', 'value'), Input('aboriginal-filter', 'value')]
+)
+def update_chart3(province, age_group, gender, income, immigrant, aboriginal):
+    import altair as alt
+
+    if not data_loaded:
+        return '<html><body><h3 style="text-align:center; color:#95a5a6;">Data not loaded</h3></body></html>'
+
+    filtered_df = df.copy()
+
+    if province and province != 'All':
+        filtered_df = filtered_df[filtered_df['Province'] == province]
+
+    if age_group and age_group != 'All':
+        age_ranges = {'12-19': (12, 19), '20-34': (20, 34), '35-49': (35, 49), '50-64': (50, 64), '65+': (65, 200)}
+        if age_group in age_ranges:
+            min_age, max_age = age_ranges[age_group]
+            filtered_df = filtered_df[(filtered_df['Age'] >= min_age) & (filtered_df['Age'] <= max_age)]
+
+    if gender and gender != 'All':
+        filtered_df = filtered_df[filtered_df['Gender'] == gender]
+    if income and income != 'All':
+        filtered_df = filtered_df[filtered_df['Total_income'] == income]
+    if immigrant and immigrant != 'All':
+        filtered_df = filtered_df[filtered_df['Immigrant'] == immigrant]
+    if aboriginal and aboriginal != 'All':
+        filtered_df = filtered_df[filtered_df['Aboriginal_identity'] == aboriginal]
+
+    filtered_df = filtered_df.dropna(subset=['Food_security', 'Mental_health_state', 'Immigrant'])
+
+    if len(filtered_df) == 0:
+        return '<html><body style="display:flex;justify-content:center;align-items:center;height:100%;background-color:#f8f9fa;"><div style="text-align:center;color:#95a5a6;"><h3>No data available</h3><p>Try adjusting your filters.</p></div></body></html>'
+
+    mental_score_map = {'Excellent': 1, 'Very good': 2, 'Good': 3, 'Fair': 4, 'Poor': 5}
+    filtered_df['Mental_health_score'] = filtered_df['Mental_health_state'].map(mental_score_map)
+
+    grouped = (
+        filtered_df
+        .groupby(['Food_security', 'Immigrant'])
+        .agg(avg_score=('Mental_health_score', 'mean'),
+             respondent_count=('Mental_health_state', 'size'))
+        .reset_index()
+    )
+
+    food_order = ['Food secure', 'Moderately food insecure', 'Severely food insecure']
+    immigrant_order = ['Yes', 'No']
+    available_food = [f for f in food_order if f in grouped['Food_security'].unique()]
+    age_label = age_group if age_group != 'All' else 'All ages'
+
+    chart = alt.Chart(grouped).mark_bar().encode(
+        x=alt.X('Food_security:N', title='Food security status',
+                sort=available_food if available_food else food_order,
+                axis=alt.Axis(labelAngle=-15, labelLimit=150)),
+        xOffset=alt.XOffset('Immigrant:N', title=None),
+        y=alt.Y('avg_score:Q', title='Average mental health (1 = Excellent, 5 = Poor)',
+                scale=alt.Scale(domain=[1, 5])),
+        color=alt.Color('Immigrant:N', title='Immigrant status',
+                        sort=immigrant_order, scale=alt.Scale(scheme='tableau10')),
+        tooltip=[
+            alt.Tooltip('Food_security:N', title='Food security'),
+            alt.Tooltip('Immigrant:N', title='Immigrant status'),
+            alt.Tooltip('avg_score:Q', title='Average mental health', format='.2f'),
+            alt.Tooltip('respondent_count:Q', title='Respondents', format=',')
+        ]
+    ).properties(
+        width=750, height=450,
+        title={'text': 'Mental health by food security (grouped by immigrant status)',
+               'subtitle': f'Total: {len(filtered_df):,} respondents | Filter: {age_label}'}
+    ).configure_axis(labelFontSize=11, titleFontSize=13
+    ).configure_legend(titleFontSize=12, labelFontSize=10, orient='right', offset=10)
+
     return chart.to_html()
 
 if __name__ == '__main__':
