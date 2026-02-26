@@ -1,12 +1,12 @@
 from dash import Dash, html, dcc, Input, Output
 import pandas as pd
 import dash_vega_components as dvc
-from plots import behavior_outcome_scatter
-
-# Import data processing functions (works both as script and module)
+# Import local modules (works both as script and module)
 try:
-    from . import data_processing  # when run via `python -m src.app`
-except ImportError:  # when run via `python src/app.py`
+    from .plots import behavior_outcome_scatter
+    from . import data_processing
+except ImportError:
+    from plots import behavior_outcome_scatter
     import data_processing
 
 app = Dash(__name__)
