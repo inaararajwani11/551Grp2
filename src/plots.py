@@ -90,7 +90,7 @@ def create_chart1(df, health_focus='Physical Health', compare_by='Income'):
                  alt.Tooltip(f'{compare_col}:N', title=compare_by),
                  alt.Tooltip('count:Q', title='Count', format=',')]
     ).properties(
-        width='container', height=250,
+        width='container', height='container',
         title=alt.TitleParams(text=title, fontSize=11, anchor='start')
     ).configure_view(strokeWidth=0)
 
@@ -185,7 +185,7 @@ def create_chart2(df, health_focus='Physical Health', compare_by='Income'):
         )
     
     chart = chart.properties(
-        width='container', height=250,
+        width='container', height='container',
         title=alt.TitleParams(text=title, fontSize=11, anchor='start')
     ).configure_view(strokeWidth=0)
 
@@ -238,7 +238,7 @@ def create_chart3(df, health_focus='Physical Health', compare_by='Income'):
         tooltip=[alt.Tooltip('Condition:N'), alt.Tooltip('Group:N', title=compare_by),
                  alt.Tooltip('Prevalence:Q', format='.1f', title='Prevalence %')]
     ).properties(
-        width='container', height=250,
+        width='container', height='container',
         title=alt.TitleParams(text=title, fontSize=11, anchor='start')
     ).configure_view(strokeWidth=0)
 
@@ -332,7 +332,7 @@ def create_chart4(df, health_focus='Physical Health', compare_by='Income'):
         )
     
     chart = chart.properties(
-        width='container', height=250,
+        width='container', height='container',
         title=alt.TitleParams(text=title, fontSize=11, anchor='start')
     ).configure_view(strokeWidth=0)
 
@@ -461,7 +461,7 @@ def create_chart5(df, health_focus='Physical Health', compare_by='Income'):
         )
     
     chart = chart.properties(
-        width='container', height=250,
+        width='container', height='container',
         title=alt.TitleParams(text=title, fontSize=11, anchor='start')
     ).configure_view(strokeWidth=0)
 
@@ -541,7 +541,7 @@ def create_chart6(df, health_focus='Physical Health', compare_by='Income'):
         color=alt.Color('Risk_Score:Q', scale=alt.Scale(scheme='redyellowgreen', reverse=True), legend=None),
         tooltip=[alt.Tooltip('Province:N'), alt.Tooltip('Risk_Score:Q', format='.1f', title='Risk %')]
     ).properties(
-        width='container', height=250,
+        width='container', height='container',
         title=alt.TitleParams(text=title, subtitle=subtitle, fontSize=11, anchor='start')
     ).configure_view(strokeWidth=0)
 
