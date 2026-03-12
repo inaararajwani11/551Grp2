@@ -1,58 +1,53 @@
-/* ===== Global Reset & Typography ===== */
+/* ===== Global ===== */
 * { box-sizing: border-box; }
 
-/* ===== Dark sidebar dropdown overrides ===== */
-.sidebar-dark .Select-control {
-    background-color: #334155 !important;
-    border: 1px solid #475569 !important;
+/* ===== Sidebar dropdown refinement ===== */
+.sidebar-light .Select-control {
+    background-color: #fff !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: 6px !important;
-    color: #e2e8f0 !important;
+    min-height: 30px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
 }
-.sidebar-dark .Select-value-label,
-.sidebar-dark .Select-placeholder,
-.sidebar-dark .Select--single > .Select-control .Select-value .Select-value-label {
-    color: #e2e8f0 !important;
+.sidebar-light .Select-control:hover {
+    border-color: #0d9488 !important;
 }
-.sidebar-dark .Select-arrow-zone .Select-arrow {
-    border-color: #94a3b8 transparent transparent !important;
+.sidebar-light .Select-value-label,
+.sidebar-light .Select--single > .Select-control .Select-value .Select-value-label {
+    color: #334155 !important;
+    font-weight: 500 !important;
 }
-.sidebar-dark .Select-menu-outer {
-    background-color: #1e293b !important;
-    border: 1px solid #475569 !important;
+.sidebar-light .Select-menu-outer {
+    border: 1px solid #e2e8f0 !important;
     border-radius: 0 0 6px 6px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
     z-index: 1000 !important;
 }
-.sidebar-dark .VirtualizedSelectOption {
-    background-color: #1e293b !important;
-    color: #e2e8f0 !important;
-}
-.sidebar-dark .VirtualizedSelectOption:hover,
-.sidebar-dark .VirtualizedSelectFocusedOption {
-    background-color: #0d9488 !important;
-    color: white !important;
+.sidebar-light .VirtualizedSelectFocusedOption {
+    background-color: #f0fdfa !important;
+    color: #0d9488 !important;
 }
 
-/* ===== Scrollbar for dark sidebar ===== */
-.sidebar-dark::-webkit-scrollbar {
-    width: 4px;
-}
-.sidebar-dark::-webkit-scrollbar-track {
-    background: #1e293b;
-}
-.sidebar-dark::-webkit-scrollbar-thumb {
-    background: #475569;
-    border-radius: 4px;
-}
+/* ===== Scrollbar ===== */
+.sidebar-light::-webkit-scrollbar { width: 3px; }
+.sidebar-light::-webkit-scrollbar-track { background: transparent; }
+.sidebar-light::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-/* ===== Chart card hover effect ===== */
+/* ===== Chart card hover ===== */
 .chart-card {
-    transition: box-shadow 0.2s ease;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 .chart-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+    transform: translateY(-1px);
 }
 
-/* ===== Vega chart action buttons - hide ===== */
-.vega-embed .vega-actions {
-    display: none !important;
+/* ===== Hide Vega action buttons ===== */
+.vega-embed .vega-actions { display: none !important; }
+
+/* ===== Reset button hover ===== */
+#reset-button:hover {
+    background-color: #0d9488 !important;
+    color: white !important;
+    border-color: #0d9488 !important;
 }

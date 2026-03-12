@@ -59,51 +59,58 @@ def apply_global_filters(df_in, province, age_group, gender, education, marital,
 
 # ============ DESIGN TOKENS ============
 FONT = '"DM Sans", sans-serif'
-HEADER_H = '56px'
-SIDEBAR_W = '210px'
+HEADER_H = '52px'
+SIDEBAR_W = '208px'
 
-# Sidebar styles
-_section = lambda label, color: html.Div(label, style={
-    'fontSize': '10px', 'fontWeight': '700', 'color': color, 'letterSpacing': '1.2px',
-    'textTransform': 'uppercase', 'margin': '14px 0 6px', 'paddingBottom': '4px',
-    'borderBottom': f'2px solid {color}'})
+# Sidebar helpers
+_section = lambda label, color: html.Div([
+    html.Div(style={'width': '3px', 'height': '12px', 'backgroundColor': color,
+                     'borderRadius': '2px', 'marginRight': '6px', 'flexShrink': '0'}),
+    html.Span(label),
+], style={'display': 'flex', 'alignItems': 'center',
+          'fontSize': '10px', 'fontWeight': '700', 'color': '#475569',
+          'letterSpacing': '1px', 'textTransform': 'uppercase',
+          'margin': '14px 0 6px'})
 
 _label = lambda text: html.Label(text, style={
-    'fontSize': '10px', 'fontWeight': '600', 'color': '#94a3b8',
+    'fontSize': '10px', 'fontWeight': '600', 'color': '#64748b',
     'marginBottom': '2px', 'display': 'block'})
 
-_dd_style = {'fontSize': '10px', 'marginBottom': '8px'}
+_dd_style = {'fontSize': '10px', 'marginBottom': '7px'}
 
-# Chart card style
+# Chart card
 CARD = {'flex': '1', 'minWidth': '0', 'padding': '8px', 'backgroundColor': 'white',
-        'margin': '4px', 'borderRadius': '8px', 'border': '1px solid #e2e8f0',
-        'boxShadow': '0 1px 3px rgba(0,0,0,0.06)', 'overflow': 'hidden'}
+        'margin': '4px', 'borderRadius': '10px', 'border': '1px solid #e8ecf1',
+        'boxShadow': '0 1px 3px rgba(0,0,0,0.04)', 'overflow': 'hidden'}
 
 # ============ LAYOUT ============
 app.layout = html.Div([
     # ===== HEADER =====
     html.Div([
+        # Teal accent line
+        html.Div(style={'position': 'absolute', 'top': '0', 'left': '0', 'right': '0',
+                         'height': '3px', 'background': 'linear-gradient(90deg, #0d9488, #06b6d4, #0d9488)'}),
         html.Div([
             html.H1('Healthcare Survey Analysis',
-                     style={'margin': '0', 'fontSize': '18px', 'fontWeight': '700',
-                            'color': 'white', 'letterSpacing': '-0.3px'}),
-            html.Span('Dashboard', style={'fontSize': '18px', 'fontWeight': '300',
-                                          'color': 'rgba(255,255,255,0.7)', 'marginLeft': '6px'}),
+                     style={'margin': '0', 'fontSize': '17px', 'fontWeight': '700',
+                            'color': '#1e293b', 'letterSpacing': '-0.3px'}),
+            html.Span('Dashboard', style={'fontSize': '17px', 'fontWeight': '400',
+                                          'color': '#94a3b8', 'marginLeft': '6px'}),
         ], style={'display': 'flex', 'alignItems': 'baseline'}),
         html.Div([
-            html.Span(data_status, style={'fontSize': '11px', 'color': '#6ee7b7'}),
-            html.Span(' | ', style={'color': 'rgba(255,255,255,0.2)', 'margin': '0 8px'}),
-            html.Span(id='filtered-count', style={'fontSize': '11px', 'color': '#93c5fd', 'fontWeight': '600'}),
+            html.Span(data_status, style={'fontSize': '11px', 'color': '#0d9488', 'fontWeight': '500'}),
+            html.Span(' | ', style={'color': '#e2e8f0', 'margin': '0 8px'}),
+            html.Span(id='filtered-count', style={'fontSize': '11px', 'color': '#475569', 'fontWeight': '600'}),
         ]),
-    ], style={'background': '#0f172a', 'display': 'flex', 'justifyContent': 'space-between',
+    ], style={'background': 'white', 'display': 'flex', 'justifyContent': 'space-between',
               'alignItems': 'center', 'padding': '0 20px', 'height': HEADER_H,
-              'borderBottom': '1px solid #1e293b'}),
+              'borderBottom': '1px solid #e8ecf1', 'position': 'relative'}),
 
     html.Div([
         # ===== SIDEBAR =====
         html.Div([
             html.Div([
-                _section('Demographics', '#38bdf8'),
+                _section('Demographics', '#0d9488'),
                 _label('Province'),
                 dcc.Dropdown(id='province-filter',
                              options=[{'label': p, 'value': p} for p in filter_options.get('provinces', ['All'])] if data_loaded else [],
@@ -117,7 +124,7 @@ app.layout = html.Div([
                              options=[{'label': g, 'value': g} for g in filter_options.get('genders', ['All'])] if data_loaded else [],
                              value='All', clearable=False, style=_dd_style),
 
-                _section('Socioeconomic', '#34d399'),
+                _section('Socioeconomic', '#0891b2'),
                 _label('Education'),
                 dcc.Dropdown(id='education-filter',
                              options=[{'label': e, 'value': e} for e in filter_options.get('educations', ['All'])] if data_loaded else [],
@@ -131,7 +138,7 @@ app.layout = html.Div([
                              options=[{'label': i, 'value': i} for i in filter_options.get('incomes', ['All'])] if data_loaded else [],
                              value='All', clearable=False, style=_dd_style),
 
-                _section('Identity', '#fb923c'),
+                _section('Identity', '#d97706'),
                 _label('Immigrant'),
                 dcc.Dropdown(id='immigrant-filter',
                              options=[{'label': i, 'value': i} for i in filter_options.get('immigrant', ['All'])] if data_loaded else [],
@@ -141,7 +148,7 @@ app.layout = html.Div([
                              options=[{'label': a, 'value': a} for a in filter_options.get('aboriginal', ['All'])] if data_loaded else [],
                              value='All', clearable=False, style=_dd_style),
 
-                _section('Analysis', '#a78bfa'),
+                _section('Analysis', '#7c3aed'),
                 _label('Health Focus'),
                 dcc.Dropdown(id='health-focus',
                              options=[{'label': h, 'value': h} for h in filter_options.get('health_focus', [])] if data_loaded else [],
@@ -152,17 +159,17 @@ app.layout = html.Div([
                              value='Income', clearable=False, style=_dd_style),
 
                 html.Button('Reset All Filters', id='reset-button', n_clicks=0,
-                            style={'width': '100%', 'padding': '8px 0', 'marginTop': '12px',
-                                   'backgroundColor': 'transparent', 'color': '#f87171',
-                                   'border': '1px solid #f87171', 'borderRadius': '6px',
-                                   'cursor': 'pointer', 'fontSize': '11px', 'fontWeight': '600',
-                                   'letterSpacing': '0.3px'}),
-            ], style={'padding': '8px 12px 16px'})
-        ], className='sidebar-dark', style={
+                            style={'width': '100%', 'padding': '7px 0', 'marginTop': '10px',
+                                   'backgroundColor': 'transparent', 'color': '#0d9488',
+                                   'border': '1.5px solid #0d9488', 'borderRadius': '6px',
+                                   'cursor': 'pointer', 'fontSize': '11px', 'fontWeight': '600'}),
+            ], style={'padding': '6px 12px 16px'})
+        ], className='sidebar-light', style={
             'width': SIDEBAR_W, 'minWidth': SIDEBAR_W, 'maxWidth': SIDEBAR_W,
-            'backgroundColor': '#0f172a', 'color': '#e2e8f0',
+            'backgroundColor': '#f8fafc',
             'height': f'calc(100vh - {HEADER_H})', 'overflowY': 'auto',
             'position': 'fixed', 'left': '0', 'top': HEADER_H,
+            'borderRight': '1px solid #e8ecf1',
         }),
 
         # ===== CHARTS =====
@@ -184,15 +191,15 @@ app.layout = html.Div([
                          className='chart-card', style=CARD),
             ], style={'display': 'flex', 'height': '50%'}),
         ], style={
-            'marginLeft': SIDEBAR_W, 'padding': '4px',
+            'marginLeft': SIDEBAR_W, 'padding': '6px',
             'height': f'calc(100vh - {HEADER_H})', 'overflow': 'hidden',
             'display': 'flex', 'flexDirection': 'column',
-            'backgroundColor': '#f1f5f9',
+            'backgroundColor': '#eef2f6',
         }),
     ], style={'position': 'relative'}),
 ], style={'fontFamily': FONT, 'margin': '0', 'padding': '0',
          'height': '100vh', 'width': '100vw', 'overflow': 'hidden',
-         'backgroundColor': '#0f172a'})
+         'backgroundColor': '#eef2f6'})
 
 # ============ CALLBACKS ============
 
