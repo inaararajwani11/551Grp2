@@ -1,9 +1,14 @@
 from dash import Dash, html, dcc, Input, Output
 import pandas as pd
 import os
-import plots
 import dash_vega_components as dvc
-import data_processing
+
+# allow both `python src/app.py` and `python -m src.app`
+try:
+    from . import plots, data_processing  # type: ignore
+except ImportError:
+    import plots  # type: ignore
+    import data_processing  # type: ignore
 
 app = Dash(__name__)
 server = app.server
