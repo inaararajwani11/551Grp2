@@ -1,6 +1,7 @@
 from dash import Dash, html, dcc, Input, Output
 import pandas as pd
 import dash_vega_components as dvc
+
 # Import local modules (works both as script and module)
 try:
     from .plots import behavior_outcome_scatter
@@ -26,13 +27,18 @@ except Exception as e:
 
 
 def vega_text(message: str, font_size: int = 16):
-    """Return a valid Vega-Lite spec that displays a centered text message."""
+    """Return a simple Vega-Lite spec for displaying a message."""
     return {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
         "width": 700,
         "height": 450,
         "data": {"values": [{"text": message}]},
-        "mark": {"type": "text", "fontSize": font_size, "align": "center", "baseline": "middle"},
+        "mark": {
+            "type": "text",
+            "fontSize": font_size,
+            "align": "center",
+            "baseline": "middle",
+        },
         "encoding": {"text": {"field": "text"}},
     }
 
@@ -46,13 +52,13 @@ def apply_global_filters(
     immigrant: str,
     aboriginal: str,
 ) -> pd.DataFrame:
-    """Apply the same filter logic used by Chart 1 so Chart 2 is connected to global filters."""
+    """Apply shared global filters across charts."""
     filtered_df = df_in.copy()
 
     if province and province != "All":
         filtered_df = filtered_df[filtered_df["Province"] == province]
 
-    # NOTE: your Age appears coded (1-5). Keep Age Group = All for now to avoid filtering to zero.
+    # Keep original logic to avoid breaking the existing app
     if age_group and age_group != "All":
         if age_group == "12-19":
             filtered_df = filtered_df[(filtered_df["Age"] >= 12) & (filtered_df["Age"] <= 19)]
@@ -84,21 +90,44 @@ def apply_global_filters(
 app.layout = html.Div([
     html.H1(
         "Healthcare Survey Analysis Dashboard",
-        style={"textAlign": "center", "color": "#2c3e50", "padding": "20px", "margin": "0", "backgroundColor": "#ecf0f1"},
+        style={
+            "textAlign": "center",
+            "color": "#2c3e50",
+            "padding": "20px",
+            "margin": "0",
+            "backgroundColor": "#ecf0f1",
+        },
     ),
 
     html.Div([
         html.H3("System Status", style={"margin": "10px 0"}),
         html.P(data_status, style={"fontSize": "14px", "margin": "5px 0"}),
         html.P("✅ App infrastructure is running!", style={"color": "green", "margin": "5px 0"}),
-    ], style={"padding": "15px", "border": "2px solid #3498db", "margin": "20px", "backgroundColor": "#ecf0f1", "borderRadius": "5px"}),
+    ], style={
+        "padding": "15px",
+        "border": "2px solid #3498db",
+        "margin": "20px",
+        "backgroundColor": "#ecf0f1",
+        "borderRadius": "5px",
+    }),
 
     html.Div([
         # LEFT SIDEBAR
         html.Div([
-            html.H3("Global Controls", style={"textAlign": "center", "color": "#2c3e50", "marginBottom": "20px"}),
+            html.H3(
+                "Global Controls",
+                style={"textAlign": "center", "color": "#2c3e50", "marginBottom": "20px"},
+            ),
 
-            html.H4("Filters", style={"color": "#34495e", "marginBottom": "15px", "borderBottom": "2px solid #95a5a6", "paddingBottom": "5px"}),
+            html.H4(
+                "Filters",
+                style={
+                    "color": "#34495e",
+                    "marginBottom": "15px",
+                    "borderBottom": "2px solid #95a5a6",
+                    "paddingBottom": "5px",
+                },
+            ),
 
             html.Div([
                 html.Label("Province", style={"fontWeight": "bold", "fontSize": "13px", "color": "#555"}),
@@ -169,7 +198,15 @@ app.layout = html.Div([
 
             html.Hr(style={"margin": "20px 0", "border": "1px solid #95a5a6"}),
 
-            html.H4("Variable Toggles", style={"color": "#34495e", "marginBottom": "15px", "borderBottom": "2px solid #95a5a6", "paddingBottom": "5px"}),
+            html.H4(
+                "Variable Toggles",
+                style={
+                    "color": "#34495e",
+                    "marginBottom": "15px",
+                    "borderBottom": "2px solid #95a5a6",
+                    "paddingBottom": "5px",
+                },
+            ),
 
             html.Div([
                 html.Label("Outcome Variable", style={"fontWeight": "bold", "fontSize": "13px", "color": "#555"}),
@@ -191,52 +228,133 @@ app.layout = html.Div([
                 ),
             ]),
 
-            html.Button("RESET FILTERS", id="reset-button", n_clicks=0, style={
-                "width": "100%", "padding": "12px", "backgroundColor": "#e74c3c", "color": "white",
-                "border": "none", "borderRadius": "5px", "cursor": "pointer", "fontSize": "14px", "fontWeight": "bold"
-            }),
-        ], style={"width": "23%", "float": "left", "padding": "20px", "backgroundColor": "#c8e6c9", "minHeight": "800px"}),
+            html.Button(
+                "RESET FILTERS",
+                id="reset-button",
+                n_clicks=0,
+                style={
+                    "width": "100%",
+                    "padding": "12px",
+                    "backgroundColor": "#e74c3c",
+                    "color": "white",
+                    "border": "none",
+                    "borderRadius": "5px",
+                    "cursor": "pointer",
+                    "fontSize": "14px",
+                    "fontWeight": "bold",
+                },
+            ),
+        ], style={
+            "width": "23%",
+            "float": "left",
+            "padding": "20px",
+            "backgroundColor": "#c8e6c9",
+            "minHeight": "800px",
+        }),
 
         # MAIN CHART AREA
         html.Div([
-            html.H3("Visualization Area", style={"textAlign": "center", "marginBottom": "20px", "color": "#2c3e50"}),
+            html.H3(
+                "Visualization Area",
+                style={"textAlign": "center", "marginBottom": "20px", "color": "#2c3e50"},
+            ),
 
-            html.Div([dvc.Vega(id="chart1", spec={}, style={"width": "100%"})],
-                     style={"backgroundColor": "white", "padding": "20px", "margin": "10px", "borderRadius": "5px", "minHeight": "520px"}),
+            html.Div(
+                [dvc.Vega(id="chart1", spec={}, style={"width": "100%"})],
+                style={
+                    "backgroundColor": "white",
+                    "padding": "20px",
+                    "margin": "10px",
+                    "borderRadius": "5px",
+                    "minHeight": "520px",
+                },
+            ),
 
-            html.Div([dvc.Vega(id="chart2", spec={}, style={"width": "100%"})],
-                     style={"backgroundColor": "white", "padding": "20px", "margin": "10px", "borderRadius": "5px", "minHeight": "520px"}),
+            html.Div(
+                [dvc.Vega(id="chart2", spec={}, style={"width": "100%"})],
+                style={
+                    "backgroundColor": "white",
+                    "padding": "20px",
+                    "margin": "10px",
+                    "borderRadius": "5px",
+                    "minHeight": "520px",
+                },
+            ),
 
             html.Div([
-                html.H4("Chart 3: Social Determinants — Food Security × Mental Health (Immigrant status)",
-                         style={"marginBottom": "10px", "color": "#2c3e50", "textAlign": "left"}),
+                html.H4(
+                    "Chart 3: Social Determinants — Food Security × Mental Health (Immigrant status)",
+                    style={"marginBottom": "10px", "color": "#2c3e50", "textAlign": "left"},
+                ),
                 html.Iframe(id="chart3", style={"width": "100%", "height": "520px", "border": "none"}),
-                html.P("Y-axis shows the average mental health score (1 = Excellent, 5 = Poor) for each food security category, grouped by immigrant status.",
-                       style={"fontSize": "12px", "color": "#7f8c8d", "marginTop": "8px"}),
-            ], style={"backgroundColor": "white", "padding": "20px", "margin": "10px",
-                      "borderRadius": "5px", "minHeight": "520px"}),
+                html.P(
+                    "Y-axis shows the average mental health score (1 = Excellent, 5 = Poor) for each food security category, grouped by immigrant status.",
+                    style={"fontSize": "12px", "color": "#7f8c8d", "marginTop": "8px"},
+                ),
+            ], style={
+                "backgroundColor": "white",
+                "padding": "20px",
+                "margin": "10px",
+                "borderRadius": "5px",
+                "minHeight": "520px",
+            }),
+
+            html.Div([
+                html.H4(
+                    "⑥ Risk Ranking Panel",
+                    style={
+                        "marginBottom": "8px",
+                        "color": "#2c3e50",
+                        "textAlign": "left",
+                        "fontWeight": "bold",
+                    },
+                ),
+                html.Div(
+                    dvc.Vega(id="chart6", spec={}, style={"width": "100%"}),
+                    style={
+                        "height": "340px",
+                        "overflowY": "auto",
+                        "paddingRight": "6px",
+                    },
+                ),
+            ], style={
+                "backgroundColor": "white",
+                "padding": "20px",
+                "margin": "10px",
+                "borderRadius": "5px",
+                "minHeight": "420px",
+                "border": "1px solid #d9d9d9",
+            }),
 
         ], style={"width": "75%", "float": "right", "padding": "20px"})
     ], style={"display": "flex", "minHeight": "800px"}),
 
     html.Div([
         html.P(
-            f"📊 Data Dictionary: {len(df.columns) if data_loaded else 0} variables available | Records: {len(df):,} after filtering" if data_loaded else "",
-            style={"textAlign": "center", "color": "#7f8c8d", "marginTop": "20px", "fontSize": "12px"},
+            f"📊 Data Dictionary: {len(df.columns) if data_loaded else 0} variables available | Records: {len(df):,} after filtering"
+            if data_loaded else "",
+            style={
+                "textAlign": "center",
+                "color": "#7f8c8d",
+                "marginTop": "20px",
+                "fontSize": "12px",
+            },
         )
     ], style={"clear": "both"}),
 ])
 
 
 @app.callback(
-    [Output("province-filter", "value"),
-     Output("age-filter", "value"),
-     Output("gender-filter", "value"),
-     Output("income-filter", "value"),
-     Output("immigrant-filter", "value"),
-     Output("aboriginal-filter", "value"),
-     Output("outcome-var", "value"),
-     Output("behavior-var", "value")],
+    [
+        Output("province-filter", "value"),
+        Output("age-filter", "value"),
+        Output("gender-filter", "value"),
+        Output("income-filter", "value"),
+        Output("immigrant-filter", "value"),
+        Output("aboriginal-filter", "value"),
+        Output("outcome-var", "value"),
+        Output("behavior-var", "value"),
+    ],
     [Input("reset-button", "n_clicks")]
 )
 def reset_filters(n_clicks):
@@ -245,13 +363,15 @@ def reset_filters(n_clicks):
 
 @app.callback(
     Output("chart1", "spec"),
-    [Input("province-filter", "value"),
-     Input("age-filter", "value"),
-     Input("gender-filter", "value"),
-     Input("income-filter", "value"),
-     Input("immigrant-filter", "value"),
-     Input("aboriginal-filter", "value"),
-     Input("outcome-var", "value")]
+    [
+        Input("province-filter", "value"),
+        Input("age-filter", "value"),
+        Input("gender-filter", "value"),
+        Input("income-filter", "value"),
+        Input("immigrant-filter", "value"),
+        Input("aboriginal-filter", "value"),
+        Input("outcome-var", "value"),
+    ]
 )
 def update_chart1(province, age_group, gender, income, immigrant, aboriginal, outcome_var):
     import altair as alt
@@ -268,10 +388,18 @@ def update_chart1(province, age_group, gender, income, immigrant, aboriginal, ou
     chart_data = filtered_df.groupby([outcome_var, "Total_income"]).size().reset_index(name="count")
 
     chart = alt.Chart(chart_data).mark_bar().encode(
-        x=alt.X(f"{outcome_var}:N", title=outcome_var.replace("_", " ").title(), axis=alt.Axis(labelAngle=-45, labelLimit=200)),
+        x=alt.X(
+            f"{outcome_var}:N",
+            title=outcome_var.replace("_", " ").title(),
+            axis=alt.Axis(labelAngle=-45, labelLimit=200),
+        ),
         y=alt.Y("count:Q", title="Number of Respondents"),
         color=alt.Color("Total_income:N", title="Income Level"),
-        tooltip=[alt.Tooltip(f"{outcome_var}:N"), alt.Tooltip("Total_income:N"), alt.Tooltip("count:Q", format=",")],
+        tooltip=[
+            alt.Tooltip(f"{outcome_var}:N"),
+            alt.Tooltip("Total_income:N"),
+            alt.Tooltip("count:Q", format=","),
+        ],
     ).properties(width=700, height=450)
 
     return chart.to_dict()
@@ -279,12 +407,14 @@ def update_chart1(province, age_group, gender, income, immigrant, aboriginal, ou
 
 @app.callback(
     Output("chart2", "spec"),
-    [Input("province-filter", "value"),
-     Input("age-filter", "value"),
-     Input("gender-filter", "value"),
-     Input("income-filter", "value"),
-     Input("immigrant-filter", "value"),
-     Input("aboriginal-filter", "value")]
+    [
+        Input("province-filter", "value"),
+        Input("age-filter", "value"),
+        Input("gender-filter", "value"),
+        Input("income-filter", "value"),
+        Input("immigrant-filter", "value"),
+        Input("aboriginal-filter", "value"),
+    ]
 )
 def update_chart2(province, age_group, gender, income, immigrant, aboriginal):
     if not data_loaded:
@@ -307,12 +437,14 @@ def update_chart2(province, age_group, gender, income, immigrant, aboriginal):
 
 @app.callback(
     Output("chart3", "srcDoc"),
-    [Input("province-filter", "value"),
-     Input("age-filter", "value"),
-     Input("gender-filter", "value"),
-     Input("income-filter", "value"),
-     Input("immigrant-filter", "value"),
-     Input("aboriginal-filter", "value")]
+    [
+        Input("province-filter", "value"),
+        Input("age-filter", "value"),
+        Input("gender-filter", "value"),
+        Input("income-filter", "value"),
+        Input("immigrant-filter", "value"),
+        Input("aboriginal-filter", "value"),
+    ]
 )
 def update_chart3(province, age_group, gender, income, immigrant, aboriginal):
     import altair as alt
@@ -333,8 +465,10 @@ def update_chart3(province, age_group, gender, income, immigrant, aboriginal):
     grouped = (
         filtered_df
         .groupby(["Food_security", "Immigrant"])
-        .agg(avg_score=("Mental_health_score", "mean"),
-             respondent_count=("Mental_health_state", "size"))
+        .agg(
+            avg_score=("Mental_health_score", "mean"),
+            respondent_count=("Mental_health_state", "size"),
+        )
         .reset_index()
     )
 
@@ -347,16 +481,26 @@ def update_chart3(province, age_group, gender, income, immigrant, aboriginal):
         alt.Chart(grouped)
         .mark_bar(size=60)
         .encode(
-            x=alt.X("Food_security:N", title="Food security status",
-                     sort=available_food if available_food else food_order,
-                     axis=alt.Axis(labelAngle=0, labelLimit=240, labelPadding=10),
-                     scale=alt.Scale(paddingInner=0.15, paddingOuter=0.2)),
+            x=alt.X(
+                "Food_security:N",
+                title="Food security status",
+                sort=available_food if available_food else food_order,
+                axis=alt.Axis(labelAngle=0, labelLimit=240, labelPadding=10),
+                scale=alt.Scale(paddingInner=0.15, paddingOuter=0.2),
+            ),
             xOffset=alt.XOffset("Immigrant:N", title=None),
-            y=alt.Y("avg_score:Q", title="Average mental health (1 = Excellent, 5 = Poor)",
-                     scale=alt.Scale(domain=[0, 5], nice=False)),
+            y=alt.Y(
+                "avg_score:Q",
+                title="Average mental health (1 = Excellent, 5 = Poor)",
+                scale=alt.Scale(domain=[0, 5], nice=False),
+            ),
             y2=alt.Y2(value=0),
-            color=alt.Color("Immigrant:N", title="Immigrant status",
-                            sort=immigrant_order, scale=alt.Scale(range=["#1f77b4", "#ff7f0e"])),
+            color=alt.Color(
+                "Immigrant:N",
+                title="Immigrant status",
+                sort=immigrant_order,
+                scale=alt.Scale(range=["#1f77b4", "#ff7f0e"]),
+            ),
             tooltip=[
                 alt.Tooltip("Food_security:N", title="Food security"),
                 alt.Tooltip("Immigrant:N", title="Immigrant status"),
@@ -366,14 +510,21 @@ def update_chart3(province, age_group, gender, income, immigrant, aboriginal):
         )
     )
 
-    baseline = alt.Chart(pd.DataFrame({"y": [0]})).mark_rule(color="#666", strokeWidth=1, opacity=0.8).encode(y="y:Q")
+    baseline = alt.Chart(pd.DataFrame({"y": [0]})).mark_rule(
+        color="#666",
+        strokeWidth=1,
+        opacity=0.8,
+    ).encode(y="y:Q")
 
     chart = (
         (bars + baseline)
         .properties(
-            width=640, height=430,
-            title={"text": "Social determinants: mental health by food security (immigrant status)",
-                   "subtitle": f"Total: {len(filtered_df):,} respondents | Filter: {age_label}"},
+            width=640,
+            height=430,
+            title={
+                "text": "Social determinants: mental health by food security (immigrant status)",
+                "subtitle": f"Total: {len(filtered_df):,} respondents | Filter: {age_label}",
+            },
         )
         .configure_axis(labelFontSize=11, titleFontSize=13, gridColor="#e5e7eb", gridOpacity=0.7)
         .configure_view(strokeWidth=0)
@@ -381,6 +532,142 @@ def update_chart3(province, age_group, gender, income, immigrant, aboriginal):
     )
 
     return chart.to_html()
+
+
+@app.callback(
+    Output("chart6", "spec"),
+    [
+        Input("province-filter", "value"),
+        Input("age-filter", "value"),
+        Input("gender-filter", "value"),
+        Input("income-filter", "value"),
+        Input("immigrant-filter", "value"),
+        Input("aboriginal-filter", "value"),
+        Input("outcome-var", "value"),
+    ]
+)
+def update_chart6(province, age_group, gender, income, immigrant, aboriginal, outcome_var):
+    import altair as alt
+
+    if not data_loaded:
+        return vega_text("Data not loaded")
+
+    filtered_df = apply_global_filters(
+        df, province, age_group, gender, income, immigrant, aboriginal
+    )
+
+    group_col = "Province"
+
+    if group_col not in filtered_df.columns or outcome_var not in filtered_df.columns:
+        return vega_text("Required columns are missing")
+
+    filtered_df = filtered_df.dropna(subset=[group_col, outcome_var]).copy()
+
+    if len(filtered_df) == 0:
+        return vega_text("No data matches the current filter selection")
+
+    health_map = {
+        "Excellent": 1,
+        "Very good": 2,
+        "Good": 3,
+        "Fair": 4,
+        "Poor": 5,
+    }
+    stress_map = {
+        "Not at all stressful": 1,
+        "Not very stressful": 2,
+        "A bit stressful": 3,
+        "Quite a bit stressful": 4,
+        "Extremely stressful": 5,
+    }
+
+    descending_is_worse = True
+
+    if outcome_var in ["Gen_health_state", "Mental_health_state"]:
+        filtered_df["risk_score"] = filtered_df[outcome_var].map(health_map)
+    elif outcome_var == "Stress_level":
+        filtered_df["risk_score"] = filtered_df[outcome_var].map(stress_map)
+    elif outcome_var == "Health_utility_index":
+        filtered_df["risk_score"] = pd.to_numeric(filtered_df[outcome_var], errors="coerce")
+        descending_is_worse = False
+    else:
+        filtered_df["risk_score"] = pd.to_numeric(filtered_df[outcome_var], errors="coerce")
+
+    filtered_df = filtered_df.dropna(subset=["risk_score"])
+
+    if len(filtered_df) == 0:
+        return vega_text("Outcome variable has no usable values under current filters")
+
+    grouped = (
+        filtered_df
+        .groupby(group_col, dropna=False)
+        .agg(
+            mean_risk=("risk_score", "mean"),
+            respondent_count=("risk_score", "size"),
+        )
+        .reset_index()
+    )
+
+    grouped = grouped[grouped["respondent_count"] >= 50]
+
+    if len(grouped) == 0:
+        return vega_text("Not enough data per group after filtering")
+
+    if descending_is_worse:
+        grouped = grouped.sort_values("mean_risk", ascending=False).head(10)
+    else:
+        grouped = grouped.sort_values("mean_risk", ascending=True).head(10)
+
+    max_risk = grouped["mean_risk"].max()
+    if pd.isna(max_risk) or max_risk == 0:
+        return vega_text("Unable to compute ranking")
+
+    grouped["risk_percent"] = grouped["mean_risk"] / max_risk * 100
+    grouped = grouped.reset_index(drop=True)
+    grouped["rank"] = grouped.index + 1
+
+    chart = (
+        alt.Chart(grouped)
+        .mark_bar(size=28)
+        .encode(
+            y=alt.Y(
+                f"{group_col}:N",
+                sort="-x",
+                axis=alt.Axis(labelFontSize=12, labelLimit=180),
+            ),
+            x=alt.X(
+                "risk_percent:Q",
+                title="Risk Score (%)",
+                axis=alt.Axis(format=".0f"),
+            ),
+            color=alt.Color(
+                "rank:N",
+                scale=alt.Scale(range=[
+                    "#e45756", "#f58549", "#f2b134", "#b7c95b", "#7dbf6a",
+                    "#5fb49c", "#4c78a8", "#6c5ce7", "#9b59b6", "#c06c84"
+                ]),
+                legend=None,
+            ),
+            tooltip=[
+                alt.Tooltip(f"{group_col}:N", title="Province"),
+                alt.Tooltip("mean_risk:Q", title="Mean risk score", format=".2f"),
+                alt.Tooltip("risk_percent:Q", title="Risk score (%)", format=".1f"),
+                alt.Tooltip("respondent_count:Q", title="Respondents", format=","),
+            ],
+        )
+        .properties(
+            width=420,
+            height=420,
+        )
+        .configure_view(stroke=None)
+        .configure_axis(
+            grid=False,
+            labelColor="#333",
+            titleColor="#333",
+        )
+    )
+
+    return chart.to_dict()
 
 
 if __name__ == "__main__":
