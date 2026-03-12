@@ -10,7 +10,9 @@ except ImportError:
     import plots  # type: ignore
     import data_processing  # type: ignore
 
-app = Dash(__name__)
+app = Dash(__name__, external_stylesheets=[
+    'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap'
+])
 server = app.server
 
 # Load data
@@ -55,151 +57,142 @@ def apply_global_filters(df_in, province, age_group, gender, education, marital,
 
     return filtered_df
 
-# ============ COMPACT LAYOUT ============
+# ============ DESIGN TOKENS ============
+FONT = '"DM Sans", sans-serif'
+HEADER_H = '56px'
+SIDEBAR_W = '210px'
+
+# Sidebar styles
+_section = lambda label, color: html.Div(label, style={
+    'fontSize': '10px', 'fontWeight': '700', 'color': color, 'letterSpacing': '1.2px',
+    'textTransform': 'uppercase', 'margin': '14px 0 6px', 'paddingBottom': '4px',
+    'borderBottom': f'2px solid {color}'})
+
+_label = lambda text: html.Label(text, style={
+    'fontSize': '10px', 'fontWeight': '600', 'color': '#94a3b8',
+    'marginBottom': '2px', 'display': 'block'})
+
+_dd_style = {'fontSize': '10px', 'marginBottom': '8px'}
+
+# Chart card style
+CARD = {'flex': '1', 'minWidth': '0', 'padding': '8px', 'backgroundColor': 'white',
+        'margin': '4px', 'borderRadius': '8px', 'border': '1px solid #e2e8f0',
+        'boxShadow': '0 1px 3px rgba(0,0,0,0.06)', 'overflow': 'hidden'}
+
+# ============ LAYOUT ============
 app.layout = html.Div([
-    # Header
+    # ===== HEADER =====
     html.Div([
-        html.H1('Healthcare Survey Analysis Dashboard', 
-               style={'margin': '0', 'padding': '12px', 'fontSize': '20px', 'color': '#2c3e50'}),
         html.Div([
-            html.Span(data_status, style={'fontSize': '11px', 'color': '#27ae60', 'marginRight': '20px'}),
-            html.Span(id='filtered-count', style={'fontSize': '11px', 'color': '#3498db', 'fontWeight': 'bold'}),
-        ], style={'padding': '3px'}),
-    ], style={'backgroundColor': '#ecf0f1', 'textAlign': 'center', 'borderBottom': '2px solid #3498db'}),
+            html.H1('Healthcare Survey Analysis',
+                     style={'margin': '0', 'fontSize': '18px', 'fontWeight': '700',
+                            'color': 'white', 'letterSpacing': '-0.3px'}),
+            html.Span('Dashboard', style={'fontSize': '18px', 'fontWeight': '300',
+                                          'color': 'rgba(255,255,255,0.7)', 'marginLeft': '6px'}),
+        ], style={'display': 'flex', 'alignItems': 'baseline'}),
+        html.Div([
+            html.Span(data_status, style={'fontSize': '11px', 'color': '#6ee7b7'}),
+            html.Span(' | ', style={'color': 'rgba(255,255,255,0.2)', 'margin': '0 8px'}),
+            html.Span(id='filtered-count', style={'fontSize': '11px', 'color': '#93c5fd', 'fontWeight': '600'}),
+        ]),
+    ], style={'background': '#0f172a', 'display': 'flex', 'justifyContent': 'space-between',
+              'alignItems': 'center', 'padding': '0 20px', 'height': HEADER_H,
+              'borderBottom': '1px solid #1e293b'}),
 
     html.Div([
-        # ========== SIDEBAR (緊湊版) ==========
+        # ===== SIDEBAR =====
         html.Div([
             html.Div([
-                # === FILTERS ===
-                html.H4("Filters", style={'fontSize': '12px', 'margin': '8px 0 5px', 'color': '#2c3e50', 
-                                         'borderBottom': '2px solid #3498db', 'paddingBottom': '3px'}),
-                
-                # Province
-                html.Label('Province', style={'fontSize': '9px', 'fontWeight': 'bold', 'marginBottom': '2px', 'display': 'block'}),
-                dcc.Dropdown(id='province-filter', 
-                            options=[{'label': p, 'value': p} for p in filter_options.get('provinces', ['All'])] if data_loaded else [],
-                            value='All', clearable=False, style={'fontSize': '9px', 'marginBottom': '6px'}),
-                
-                # Age
-                html.Label('Age', style={'fontSize': '9px', 'fontWeight': 'bold', 'marginBottom': '2px', 'display': 'block'}),
-                dcc.Dropdown(id='age-filter', 
-                            options=[{'label': a, 'value': a} for a in filter_options.get('age_groups', ['All'])] if data_loaded else [],
-                            value='All', clearable=False, style={'fontSize': '9px', 'marginBottom': '6px'}),
-                
-                # Gender
-                html.Label('Gender', style={'fontSize': '9px', 'fontWeight': 'bold', 'marginBottom': '2px', 'display': 'block'}),
-                dcc.Dropdown(id='gender-filter', 
-                            options=[{'label': g, 'value': g} for g in filter_options.get('genders', ['All'])] if data_loaded else [],
-                            value='All', clearable=False, style={'fontSize': '9px', 'marginBottom': '6px'}),
-                
-                # Education
-                html.Label('Education', style={'fontSize': '9px', 'fontWeight': 'bold', 'marginBottom': '2px', 'display': 'block'}),
-                dcc.Dropdown(id='education-filter', 
-                            options=[{'label': e, 'value': e} for e in filter_options.get('educations', ['All'])] if data_loaded else [],
-                            value='All', clearable=False, style={'fontSize': '9px', 'marginBottom': '6px'}),
-                
-                # Marital
-                html.Label('Marital', style={'fontSize': '9px', 'fontWeight': 'bold', 'marginBottom': '2px', 'display': 'block'}),
-                dcc.Dropdown(id='marital-filter', 
-                            options=[{'label': m, 'value': m} for m in filter_options.get('maritals', ['All'])] if data_loaded else [],
-                            value='All', clearable=False, style={'fontSize': '9px', 'marginBottom': '6px'}),
-                
-                # Income
-                html.Label('Income', style={'fontSize': '9px', 'fontWeight': 'bold', 'marginBottom': '2px', 'display': 'block'}),
-                dcc.Dropdown(id='income-filter', 
-                            options=[{'label': i, 'value': i} for i in filter_options.get('incomes', ['All'])] if data_loaded else [],
-                            value='All', clearable=False, style={'fontSize': '9px', 'marginBottom': '6px'}),
-                
-                # Immigrant
-                html.Label('Immigrant', style={'fontSize': '9px', 'fontWeight': 'bold', 'marginBottom': '2px', 'display': 'block'}),
-                dcc.Dropdown(id='immigrant-filter', 
-                            options=[{'label': i, 'value': i} for i in filter_options.get('immigrant', ['All'])] if data_loaded else [],
-                            value='All', clearable=False, style={'fontSize': '9px', 'marginBottom': '6px'}),
-                
-                # Aboriginal
-                html.Label('Aboriginal', style={'fontSize': '9px', 'fontWeight': 'bold', 'marginBottom': '2px', 'display': 'block'}),
-                dcc.Dropdown(id='aboriginal-filter', 
-                            options=[{'label': a, 'value': a} for a in filter_options.get('aboriginal', ['All'])] if data_loaded else [],
-                            value='All', clearable=False, style={'fontSize': '9px', 'marginBottom': '8px'}),
-                
-                html.Hr(style={'margin': '8px 0', 'border': '1px solid #bdc3c7'}),
-                
-                # === TOGGLES (改成下拉選單) ===
-                html.H4("Theme", style={'fontSize': '12px', 'margin': '8px 0 5px', 'color': '#2c3e50',
-                                       'borderBottom': '2px solid #3498db', 'paddingBottom': '3px'}),
-                
-                # Health Focus (Dropdown)
-                html.Label('Health Focus', style={'fontSize': '9px', 'fontWeight': 'bold', 'marginBottom': '2px', 'display': 'block'}),
-                dcc.Dropdown(
-                    id='health-focus',
-                    options=[{'label': h, 'value': h} for h in filter_options.get('health_focus', [])] if data_loaded else [],
-                    value='Physical Health',
-                    clearable=False,
-                    style={'fontSize': '9px', 'marginBottom': '6px'}
-                ),
-                
-                # Compare By (Dropdown)
-                html.Label('Compare By', style={'fontSize': '9px', 'fontWeight': 'bold', 'marginBottom': '2px', 'display': 'block'}),
-                dcc.Dropdown(
-                    id='compare-by',
-                    options=[{'label': c, 'value': c} for c in filter_options.get('compare_by', [])] if data_loaded else [],
-                    value='Income',
-                    clearable=False,
-                    style={'fontSize': '9px', 'marginBottom': '10px'}
-                ),
-                
-                html.Button('RESET ALL', id='reset-button', n_clicks=0, 
-                           style={'width': '100%', 'padding': '8px', 'backgroundColor': '#e74c3c', 
-                                  'color': 'white', 'border': 'none', 'borderRadius': '4px', 
-                                  'cursor': 'pointer', 'fontSize': '10px', 'fontWeight': 'bold'}),
-            ], style={'padding': '10px'})
-        ], style={
-            'width': '18%',
-            'minWidth': '180px',
-            'maxWidth': '220px',
-            'backgroundColor': '#d5f4e6',
-            'height': 'calc(100vh - 64px)',
-            'overflowY': 'auto',
-            'position': 'fixed',
-            'left': '0',
-            'top': '64px',
-            'boxShadow': '2px 0 5px rgba(0,0,0,0.1)'
+                _section('Demographics', '#38bdf8'),
+                _label('Province'),
+                dcc.Dropdown(id='province-filter',
+                             options=[{'label': p, 'value': p} for p in filter_options.get('provinces', ['All'])] if data_loaded else [],
+                             value='All', clearable=False, style=_dd_style),
+                _label('Age'),
+                dcc.Dropdown(id='age-filter',
+                             options=[{'label': a, 'value': a} for a in filter_options.get('age_groups', ['All'])] if data_loaded else [],
+                             value='All', clearable=False, style=_dd_style),
+                _label('Gender'),
+                dcc.Dropdown(id='gender-filter',
+                             options=[{'label': g, 'value': g} for g in filter_options.get('genders', ['All'])] if data_loaded else [],
+                             value='All', clearable=False, style=_dd_style),
+
+                _section('Socioeconomic', '#34d399'),
+                _label('Education'),
+                dcc.Dropdown(id='education-filter',
+                             options=[{'label': e, 'value': e} for e in filter_options.get('educations', ['All'])] if data_loaded else [],
+                             value='All', clearable=False, style=_dd_style),
+                _label('Marital'),
+                dcc.Dropdown(id='marital-filter',
+                             options=[{'label': m, 'value': m} for m in filter_options.get('maritals', ['All'])] if data_loaded else [],
+                             value='All', clearable=False, style=_dd_style),
+                _label('Income'),
+                dcc.Dropdown(id='income-filter',
+                             options=[{'label': i, 'value': i} for i in filter_options.get('incomes', ['All'])] if data_loaded else [],
+                             value='All', clearable=False, style=_dd_style),
+
+                _section('Identity', '#fb923c'),
+                _label('Immigrant'),
+                dcc.Dropdown(id='immigrant-filter',
+                             options=[{'label': i, 'value': i} for i in filter_options.get('immigrant', ['All'])] if data_loaded else [],
+                             value='All', clearable=False, style=_dd_style),
+                _label('Aboriginal'),
+                dcc.Dropdown(id='aboriginal-filter',
+                             options=[{'label': a, 'value': a} for a in filter_options.get('aboriginal', ['All'])] if data_loaded else [],
+                             value='All', clearable=False, style=_dd_style),
+
+                _section('Analysis', '#a78bfa'),
+                _label('Health Focus'),
+                dcc.Dropdown(id='health-focus',
+                             options=[{'label': h, 'value': h} for h in filter_options.get('health_focus', [])] if data_loaded else [],
+                             value='Physical Health', clearable=False, style=_dd_style),
+                _label('Compare By'),
+                dcc.Dropdown(id='compare-by',
+                             options=[{'label': c, 'value': c} for c in filter_options.get('compare_by', [])] if data_loaded else [],
+                             value='Income', clearable=False, style=_dd_style),
+
+                html.Button('Reset All Filters', id='reset-button', n_clicks=0,
+                            style={'width': '100%', 'padding': '8px 0', 'marginTop': '12px',
+                                   'backgroundColor': 'transparent', 'color': '#f87171',
+                                   'border': '1px solid #f87171', 'borderRadius': '6px',
+                                   'cursor': 'pointer', 'fontSize': '11px', 'fontWeight': '600',
+                                   'letterSpacing': '0.3px'}),
+            ], style={'padding': '8px 12px 16px'})
+        ], className='sidebar-dark', style={
+            'width': SIDEBAR_W, 'minWidth': SIDEBAR_W, 'maxWidth': SIDEBAR_W,
+            'backgroundColor': '#0f172a', 'color': '#e2e8f0',
+            'height': f'calc(100vh - {HEADER_H})', 'overflowY': 'auto',
+            'position': 'fixed', 'left': '0', 'top': HEADER_H,
         }),
-        
-        # ========== CHARTS ==========
+
+        # ===== CHARTS =====
         html.Div([
             html.Div([
-                html.Div([dvc.Vega(id='chart1', spec={}, style={'width': '100%', 'height': '100%'})], 
-                        style={'flex': '1', 'minWidth': '0', 'padding': '5px', 'backgroundColor': 'white', 
-                               'margin': '3px', 'borderRadius': '5px', 'boxShadow': '0 2px 5px rgba(0,0,0,0.1)', 'overflow': 'hidden'}),
-                html.Div([dvc.Vega(id='chart2', spec={}, style={'width': '100%', 'height': '100%'})], 
-                        style={'flex': '1', 'minWidth': '0', 'padding': '5px', 'backgroundColor': 'white', 
-                               'margin': '3px', 'borderRadius': '5px', 'boxShadow': '0 2px 5px rgba(0,0,0,0.1)', 'overflow': 'hidden'}),
-                html.Div([dvc.Vega(id='chart3', spec={}, style={'width': '100%', 'height': '100%'})], 
-                        style={'flex': '1', 'minWidth': '0', 'padding': '5px', 'backgroundColor': 'white', 
-                               'margin': '3px', 'borderRadius': '5px', 'boxShadow': '0 2px 5px rgba(0,0,0,0.1)', 'overflow': 'hidden'}),
-            ], style={'display': 'flex', 'flexWrap': 'nowrap', 'height': '49%', 'gap': '0'}),
-            
+                html.Div([dvc.Vega(id='chart1', spec={}, style={'width': '100%', 'height': '100%'})],
+                         className='chart-card', style=CARD),
+                html.Div([dvc.Vega(id='chart2', spec={}, style={'width': '100%', 'height': '100%'})],
+                         className='chart-card', style=CARD),
+                html.Div([dvc.Vega(id='chart3', spec={}, style={'width': '100%', 'height': '100%'})],
+                         className='chart-card', style=CARD),
+            ], style={'display': 'flex', 'height': '50%'}),
             html.Div([
-                html.Div([dvc.Vega(id='chart4', spec={}, style={'width': '100%', 'height': '100%'})], 
-                        style={'flex': '1', 'minWidth': '0', 'padding': '5px', 'backgroundColor': 'white', 
-                               'margin': '3px', 'borderRadius': '5px', 'boxShadow': '0 2px 5px rgba(0,0,0,0.1)', 'overflow': 'hidden'}),
-                html.Div([dvc.Vega(id='chart5', spec={}, style={'width': '100%', 'height': '100%'})], 
-                        style={'flex': '1', 'minWidth': '0', 'padding': '5px', 'backgroundColor': 'white', 
-                               'margin': '3px', 'borderRadius': '5px', 'boxShadow': '0 2px 5px rgba(0,0,0,0.1)', 'overflow': 'hidden'}),
-                html.Div([dvc.Vega(id='chart6', spec={}, style={'width': '100%', 'height': '100%'})], 
-                        style={'flex': '1', 'minWidth': '0', 'padding': '5px', 'backgroundColor': 'white', 
-                               'margin': '3px', 'borderRadius': '5px', 'boxShadow': '0 2px 5px rgba(0,0,0,0.1)', 'overflow': 'hidden'}),
-            ], style={'display': 'flex', 'flexWrap': 'nowrap', 'height': '49%', 'gap': '0'}),
+                html.Div([dvc.Vega(id='chart4', spec={}, style={'width': '100%', 'height': '100%'})],
+                         className='chart-card', style=CARD),
+                html.Div([dvc.Vega(id='chart5', spec={}, style={'width': '100%', 'height': '100%'})],
+                         className='chart-card', style=CARD),
+                html.Div([dvc.Vega(id='chart6', spec={}, style={'width': '100%', 'height': '100%'})],
+                         className='chart-card', style=CARD),
+            ], style={'display': 'flex', 'height': '50%'}),
         ], style={
-            'marginLeft': '18%', 'padding': '4px',
-            'height': 'calc(100vh - 64px)', 'overflow': 'hidden',
-            'display': 'flex', 'flexDirection': 'column', 'gap': '0'
+            'marginLeft': SIDEBAR_W, 'padding': '4px',
+            'height': f'calc(100vh - {HEADER_H})', 'overflow': 'hidden',
+            'display': 'flex', 'flexDirection': 'column',
+            'backgroundColor': '#f1f5f9',
         }),
     ], style={'position': 'relative'}),
-], style={'fontFamily': 'Arial, sans-serif', 'margin': '0', 'padding': '0', 
-         'height': '100vh', 'width': '100vw', 'overflow': 'hidden'})
+], style={'fontFamily': FONT, 'margin': '0', 'padding': '0',
+         'height': '100vh', 'width': '100vw', 'overflow': 'hidden',
+         'backgroundColor': '#0f172a'})
 
 # ============ CALLBACKS ============
 

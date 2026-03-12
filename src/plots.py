@@ -84,14 +84,15 @@ def create_chart1(df, health_focus='Physical Health', compare_by='Income'):
         y=alt.Y('count:Q', title='Count', stack='zero',
                 axis=alt.Axis(titleFontSize=10, labelFontSize=9)),
         color=alt.Color(f'{compare_col}:N', title=compare_by, sort=compare_order,
-                       scale=alt.Scale(scheme='tableau20'),
+                       scale=alt.Scale(scheme='tableau10'),
                        legend=alt.Legend(orient='right', titleFontSize=9, labelFontSize=8, labelLimit=100)),
         tooltip=[alt.Tooltip(f'{outcome_var}:N', title=title),
                  alt.Tooltip(f'{compare_col}:N', title=compare_by),
                  alt.Tooltip('count:Q', title='Count', format=',')]
     ).properties(
         width='container', height='container',
-        title=alt.TitleParams(text=title, fontSize=11, anchor='start')
+        title=alt.TitleParams(text=title, subtitle=f'Stacked by {compare_by}',
+                              fontSize=11, subtitleFontSize=9, subtitleColor='#666', anchor='start')
     ).configure_view(strokeWidth=0)
 
     return chart.to_dict()
@@ -171,7 +172,7 @@ def create_chart2(df, health_focus='Physical Health', compare_by='Income'):
         if len(chart_df) > 2000:
             chart_df = chart_df.sample(n=2000, random_state=42)
         
-        chart = alt.Chart(chart_df).mark_circle(size=30, opacity=0.6).encode(
+        chart = alt.Chart(chart_df).mark_circle(size=20, opacity=0.4).encode(
             x=alt.X(f'{x_var}:Q', title='Fruit & Veg (servings/day)', 
                    scale=alt.Scale(zero=True), axis=alt.Axis(labelFontSize=9)),
             y=alt.Y(f'{y_var}:Q', title='Life Satisfaction', 
@@ -186,7 +187,8 @@ def create_chart2(df, health_focus='Physical Health', compare_by='Income'):
     
     chart = chart.properties(
         width='container', height='container',
-        title=alt.TitleParams(text=title, fontSize=11, anchor='start')
+        title=alt.TitleParams(text=title, subtitle=f'Compared by {compare_by}',
+                              fontSize=11, subtitleFontSize=9, subtitleColor='#666', anchor='start')
     ).configure_view(strokeWidth=0)
 
     return chart.to_dict()
@@ -230,16 +232,32 @@ def create_chart3(df, health_focus='Physical Health', compare_by='Income'):
     
     heatmap_df = pd.DataFrame(data_list)
     
-    chart = alt.Chart(heatmap_df).mark_rect().encode(
-        x=alt.X('Condition:N', title=None, axis=alt.Axis(labelAngle=-30, labelLimit=80, labelFontSize=9)),
+    base = alt.Chart(heatmap_df)
+
+    rect = base.mark_rect().encode(
+        x=alt.X('Condition:N', title='Condition', axis=alt.Axis(labelAngle=-30, labelLimit=80, labelFontSize=9)),
         y=alt.Y('Group:N', title=compare_by, axis=alt.Axis(labelLimit=120, labelFontSize=8)),
-        color=alt.Color('Prevalence:Q', title='%', scale=alt.Scale(scheme='reds'),
+        color=alt.Color('Prevalence:Q', title='Prevalence %', scale=alt.Scale(scheme='reds'),
                        legend=alt.Legend(orient='right', titleFontSize=9, labelFontSize=8)),
         tooltip=[alt.Tooltip('Condition:N'), alt.Tooltip('Group:N', title=compare_by),
                  alt.Tooltip('Prevalence:Q', format='.1f', title='Prevalence %')]
-    ).properties(
+    )
+
+    text = base.mark_text(fontSize=9, fontWeight='bold').encode(
+        x=alt.X('Condition:N'),
+        y=alt.Y('Group:N'),
+        text=alt.Text('Prevalence:Q', format='.1f'),
+        color=alt.condition(
+            alt.datum.Prevalence > 30,
+            alt.value('white'),
+            alt.value('#333')
+        )
+    )
+
+    chart = (rect + text).properties(
         width='container', height='container',
-        title=alt.TitleParams(text=title, fontSize=11, anchor='start')
+        title=alt.TitleParams(text=title, subtitle='Prevalence (%) shown in each cell',
+                              fontSize=11, subtitleFontSize=9, subtitleColor='#666', anchor='start')
     ).configure_view(strokeWidth=0)
 
     return chart.to_dict()
@@ -333,7 +351,8 @@ def create_chart4(df, health_focus='Physical Health', compare_by='Income'):
     
     chart = chart.properties(
         width='container', height='container',
-        title=alt.TitleParams(text=title, fontSize=11, anchor='start')
+        title=alt.TitleParams(text=title, subtitle='Cross-factor comparison',
+                              fontSize=11, subtitleFontSize=9, subtitleColor='#666', anchor='start')
     ).configure_view(strokeWidth=0)
 
     return chart.to_dict()
@@ -374,7 +393,7 @@ def create_chart5(df, health_focus='Physical Health', compare_by='Income'):
                    axis=alt.Axis(labelAngle=0, labelFontSize=9)),
             y=alt.Y('avg_activity:Q', title='Avg Physical Activity (min/week)',
                    axis=alt.Axis(labelFontSize=9)),
-            size=alt.Size('count:Q', title='Count', scale=alt.Scale(range=[100, 800]),
+            size=alt.Size('count:Q', title='Sample Size', scale=alt.Scale(range=[100, 800]),
                          legend=alt.Legend(orient='right', labelFontSize=8)),
             color=alt.Color(f'{compare_col}:N', title=compare_by, scale=alt.Scale(scheme='category10'),
                            legend=alt.Legend(orient='right', labelFontSize=8)),
@@ -411,7 +430,7 @@ def create_chart5(df, health_focus='Physical Health', compare_by='Income'):
                    axis=alt.Axis(labelAngle=-30, labelFontSize=8, labelLimit=60)),
             y=alt.Y('avg_satisfaction:Q', title='Avg Life Satisfaction',
                    scale=alt.Scale(domain=[0, 10]), axis=alt.Axis(labelFontSize=9)),
-            size=alt.Size('count:Q', title='Count', scale=alt.Scale(range=[100, 800]),
+            size=alt.Size('count:Q', title='Sample Size', scale=alt.Scale(range=[100, 800]),
                          legend=alt.Legend(orient='right', labelFontSize=8)),
             color=alt.Color(f'{compare_col}:N', title=compare_by, scale=alt.Scale(scheme='viridis'),
                            legend=alt.Legend(orient='right', labelFontSize=8)),
@@ -451,7 +470,7 @@ def create_chart5(df, health_focus='Physical Health', compare_by='Income'):
                    axis=alt.Axis(labelAngle=-20, labelFontSize=9)),
             y=alt.Y('avg_alcohol:Q', title='Avg Alcohol (drinks/week)',
                    axis=alt.Axis(labelFontSize=9)),
-            size=alt.Size('count:Q', title='Count', scale=alt.Scale(range=[100, 800]),
+            size=alt.Size('count:Q', title='Sample Size', scale=alt.Scale(range=[100, 800]),
                          legend=alt.Legend(orient='right', labelFontSize=8)),
             color=alt.Color(f'{compare_col}:N', title=compare_by, scale=alt.Scale(scheme='category10'),
                            legend=alt.Legend(orient='right', labelFontSize=8)),
@@ -462,7 +481,8 @@ def create_chart5(df, health_focus='Physical Health', compare_by='Income'):
     
     chart = chart.properties(
         width='container', height='container',
-        title=alt.TitleParams(text=title, fontSize=11, anchor='start')
+        title=alt.TitleParams(text=title, subtitle='Bubble size indicates sample count',
+                              fontSize=11, subtitleFontSize=9, subtitleColor='#666', anchor='start')
     ).configure_view(strokeWidth=0)
 
     return chart.to_dict()
@@ -535,14 +555,25 @@ def create_chart6(df, health_focus='Physical Health', compare_by='Income'):
     
     risk_df = pd.DataFrame(risk_data).sort_values('Risk_Score', ascending=False)
     
-    chart = alt.Chart(risk_df).mark_bar().encode(
+    base = alt.Chart(risk_df)
+
+    bars = base.mark_bar().encode(
         x=alt.X('Risk_Score:Q', title='Risk %', axis=alt.Axis(labelFontSize=9, titleFontSize=10)),
         y=alt.Y('Province:N', title=None, sort='-x', axis=alt.Axis(labelFontSize=8, labelLimit=100)),
-        color=alt.Color('Risk_Score:Q', scale=alt.Scale(scheme='redyellowgreen', reverse=True), legend=None),
+        color=alt.Color('Risk_Score:Q', scale=alt.Scale(scheme='oranges'), legend=None),
         tooltip=[alt.Tooltip('Province:N'), alt.Tooltip('Risk_Score:Q', format='.1f', title='Risk %')]
-    ).properties(
+    )
+
+    text = base.mark_text(align='left', dx=3, fontSize=9).encode(
+        x=alt.X('Risk_Score:Q'),
+        y=alt.Y('Province:N', sort='-x'),
+        text=alt.Text('Risk_Score:Q', format='.1f')
+    )
+
+    chart = (bars + text).properties(
         width='container', height='container',
-        title=alt.TitleParams(text=title, subtitle=subtitle, fontSize=11, anchor='start')
+        title=alt.TitleParams(text=title, subtitle=subtitle,
+                              fontSize=11, subtitleFontSize=9, subtitleColor='#666', anchor='start')
     ).configure_view(strokeWidth=0)
 
     return chart.to_dict()

@@ -1,0 +1,58 @@
+/* ===== Global Reset & Typography ===== */
+* { box-sizing: border-box; }
+
+/* ===== Dark sidebar dropdown overrides ===== */
+.sidebar-dark .Select-control {
+    background-color: #334155 !important;
+    border: 1px solid #475569 !important;
+    border-radius: 6px !important;
+    color: #e2e8f0 !important;
+}
+.sidebar-dark .Select-value-label,
+.sidebar-dark .Select-placeholder,
+.sidebar-dark .Select--single > .Select-control .Select-value .Select-value-label {
+    color: #e2e8f0 !important;
+}
+.sidebar-dark .Select-arrow-zone .Select-arrow {
+    border-color: #94a3b8 transparent transparent !important;
+}
+.sidebar-dark .Select-menu-outer {
+    background-color: #1e293b !important;
+    border: 1px solid #475569 !important;
+    border-radius: 0 0 6px 6px !important;
+    z-index: 1000 !important;
+}
+.sidebar-dark .VirtualizedSelectOption {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+.sidebar-dark .VirtualizedSelectOption:hover,
+.sidebar-dark .VirtualizedSelectFocusedOption {
+    background-color: #0d9488 !important;
+    color: white !important;
+}
+
+/* ===== Scrollbar for dark sidebar ===== */
+.sidebar-dark::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar-dark::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+.sidebar-dark::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+}
+
+/* ===== Chart card hover effect ===== */
+.chart-card {
+    transition: box-shadow 0.2s ease;
+}
+.chart-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+}
+
+/* ===== Vega chart action buttons - hide ===== */
+.vega-embed .vega-actions {
+    display: none !important;
+}
