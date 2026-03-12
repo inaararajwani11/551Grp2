@@ -10,9 +10,11 @@ except ImportError:
     import plots  # type: ignore
     import data_processing  # type: ignore
 
-app = Dash(__name__, external_stylesheets=[
-    'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap'
-])
+app = Dash(__name__,
+    title='Healthcare Survey Analysis Dashboard',
+    external_stylesheets=[
+        'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap'
+    ])
 server = app.server
 
 # Load data
@@ -60,7 +62,7 @@ def apply_global_filters(df_in, province, age_group, gender, education, marital,
 # ============ DESIGN TOKENS ============
 FONT = '"DM Sans", sans-serif'
 HEADER_H = '52px'
-SIDEBAR_W = '208px'
+SIDEBAR_W = '230px'
 
 _dd_style = {'fontSize': '10px', 'marginBottom': '6px'}
 
@@ -100,17 +102,50 @@ app.layout = html.Div([
         ], style={'display': 'flex', 'alignItems': 'baseline'}),
         html.Div([
             html.Span(data_status, style={'fontSize': '11px', 'color': '#0d9488', 'fontWeight': '500'}),
-            html.Span(' | ', style={'color': '#e2e8f0', 'margin': '0 8px'}),
-            html.Span(id='filtered-count', style={'fontSize': '11px', 'color': '#475569', 'fontWeight': '600'}),
         ]),
     ], style={'background': 'white', 'display': 'flex', 'justifyContent': 'space-between',
               'alignItems': 'center', 'padding': '0 20px', 'height': HEADER_H,
-              'borderBottom': '1px solid #e8ecf1', 'position': 'relative'}),
+              'borderBottom': '1px solid #e8ecf1', 'position': 'fixed', 'top': '0', 'left': '0',
+              'right': '0', 'zIndex': '100'}),
 
     html.Div([
         # ===== SIDEBAR =====
         html.Div([
             html.Div([
+
+                # --- About / Usage guide ---
+                html.Details([
+                    html.Summary([
+                        html.Span([
+                            html.Span('ℹ', style={'fontSize': '10px', 'marginRight': '6px',
+                                                   'verticalAlign': 'middle'}),
+                            'About',
+                        ]),
+                        html.Span(className='filter-summary-icon'),
+                    ]),
+                    html.Div([
+                        html.P(
+                            'Explore health disparities across Canadian populations using data from the '
+                            'Canadian Community Health Survey (CCHS, 2015–2016), covering 108,074 respondents.',
+                            style={'fontSize': '9px', 'color': '#475569', 'margin': '0 0 6px',
+                                   'lineHeight': '1.5'}
+                        ),
+                        html.P('How to use:', style={'fontSize': '9px', 'fontWeight': '700',
+                                                      'color': '#334155', 'margin': '0 0 4px'}),
+                        html.Ul([
+                            html.Li('Health Focus — switch the analysis theme (Physical / Mental / Lifestyle). '
+                                    'All 6 charts update accordingly.',
+                                    style={'marginBottom': '3px'}),
+                            html.Li('Compare By — choose a demographic variable (Income, Education, Age, Gender) '
+                                    'to group and compare data across charts.',
+                                    style={'marginBottom': '3px'}),
+                            html.Li('Filters — narrow down to a specific subpopulation '
+                                    '(e.g. elderly women in Ontario).',
+                                    style={'marginBottom': '0'}),
+                        ], style={'fontSize': '9px', 'color': '#475569', 'margin': '0',
+                                  'paddingLeft': '12px', 'lineHeight': '1.5'}),
+                    ], className='filter-body'),
+                ], className='filter-section', style={'marginBottom': '10px'}),
 
                 # --- Health Focus pills (most prominent) ---
                 html.Div('Health Focus', className='filter-label'),
@@ -192,7 +227,7 @@ app.layout = html.Div([
                                    'border': '1.5px solid #0d9488', 'borderRadius': '6px',
                                    'cursor': 'pointer', 'fontSize': '11px', 'fontWeight': '600'}),
 
-            ], style={'padding': '10px 10px 16px'})
+            ], style={'padding': '10px 10px 160px'})
         ], className='sidebar-light', style={
             'width': SIDEBAR_W, 'minWidth': SIDEBAR_W, 'maxWidth': SIDEBAR_W,
             'backgroundColor': '#f8fafc',
@@ -225,7 +260,7 @@ app.layout = html.Div([
             'display': 'flex', 'flexDirection': 'column',
             'backgroundColor': '#eef2f6',
         }),
-    ], style={'position': 'relative'}),
+    ], style={'position': 'relative', 'marginTop': HEADER_H}),
 ], style={'fontFamily': FONT, 'margin': '0', 'padding': '0',
          'height': '100vh', 'width': '100vw', 'overflow': 'hidden',
          'backgroundColor': '#eef2f6'})
@@ -242,18 +277,6 @@ app.layout = html.Div([
 def reset_all(n_clicks):
     return 'All', 'All', 'All', 'All', 'All', 'All', 'All', 'All', 'Physical Health', 'Income'
 
-@app.callback(
-    Output('filtered-count', 'children'),
-    [Input('province-filter', 'value'), Input('age-filter', 'value'), Input('gender-filter', 'value'),
-     Input('education-filter', 'value'), Input('marital-filter', 'value'),
-     Input('income-filter', 'value'), Input('immigrant-filter', 'value'), Input('aboriginal-filter', 'value')]
-)
-def update_count(province, age, gender, edu, marital, income, imm, ab):
-    if not data_loaded:
-        return ""
-    filtered = apply_global_filters(df, province, age, gender, edu, marital, income, imm, ab)
-    pct = len(filtered) / len(df) * 100
-    return f"📊 {len(filtered):,} records ({pct:.1f}%)"
 
 ALL_INPUTS = [
     Input('province-filter', 'value'), Input('age-filter', 'value'), Input('gender-filter', 'value'),
@@ -323,4 +346,4 @@ def update_chart6(province, age, gender, edu, marital, income, imm, ab, health_f
         return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": f"Error: {str(e)[:80]}"}}}
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8050)
+    app.run_server(debug=False, port=8050)

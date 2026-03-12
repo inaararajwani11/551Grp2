@@ -39,7 +39,6 @@
 .filter-section {
     border-radius: 6px;
     margin-bottom: 4px;
-    overflow: hidden;
 }
 .filter-section summary {
     display: flex;

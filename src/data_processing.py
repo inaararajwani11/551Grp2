@@ -43,7 +43,17 @@ def load_data():
     # 統一 Immigrant/Aboriginal 命名
     df['Immigrant'] = df['Immigrant'].replace({'Yes': 'Immigrant', 'No': 'Non-immigrant'})
     df['Aboriginal_identity'] = df['Aboriginal_identity'].replace({'Yes': 'Aboriginal', 'No': 'Non-Aboriginal'})
-    
+
+    # Lifestyle binary indicators (numeric codes → Yes/No)
+    # Smoked: values <900 = currently smokes; 996/999 = non-smoker or not stated
+    df['Smoked_bin'] = df['Smoked'].apply(
+        lambda x: 'Yes' if pd.notna(x) and x < 900 else ('No' if pd.notna(x) else None)
+    )
+    # Cannabies_use: 1=Yes, 2=No, 9=not applicable
+    df['Cannabis_bin'] = df['Cannabies_use'].map({1: 'Yes', 2: 'No'})
+    # Drug_use: 1=Yes (used in past year), 2/6=No, 9=not applicable
+    df['Drug_bin'] = df['Drug_use'].map({1: 'Yes', 2: 'No', 6: 'No'})
+
     return df
 
 
