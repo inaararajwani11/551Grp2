@@ -27,12 +27,12 @@
     color: #0d9488;
 }
 .radio-pills input[type="radio"] { display: none; }
-.radio-pills input[type="radio"]:checked + label {
+.radio-pills label:has(input[type="radio"]:checked) {
     background: #0d9488;
     border-color: #0d9488;
     color: white;
     font-weight: 600;
-    box-shadow: 0 1px 4px rgba(13,148,136,0.3);
+    box-shadow: 0 2px 6px rgba(13,148,136,0.35);
 }
 
 /* ===== Collapsible filter sections ===== */
