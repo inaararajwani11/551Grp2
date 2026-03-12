@@ -1,27 +1,101 @@
 /* ===== Global ===== */
 * { box-sizing: border-box; }
 
-/* ===== Sidebar dropdown refinement ===== */
+/* ===== Radio pill buttons (Health Focus & Compare By) ===== */
+.radio-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+.radio-pills label {
+    padding: 4px 9px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 500;
+    color: #64748b;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    user-select: none;
+}
+.radio-pills label:hover {
+    background: #e0f2fe;
+    border-color: #0d9488;
+    color: #0d9488;
+}
+.radio-pills input[type="radio"] { display: none; }
+.radio-pills input[type="radio"]:checked + label {
+    background: #0d9488;
+    border-color: #0d9488;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(13,148,136,0.3);
+}
+
+/* ===== Collapsible filter sections ===== */
+.filter-section {
+    border-radius: 6px;
+    margin-bottom: 4px;
+    overflow: hidden;
+}
+.filter-section summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #475569;
+    border: 1px solid transparent;
+    transition: background 0.15s;
+}
+.filter-section summary::-webkit-details-marker { display: none; }
+.filter-section summary:hover { background: #e8f4f3; color: #0d9488; border-color: #ccede9; }
+.filter-section[open] summary { background: #e8f4f3; color: #0d9488; border-color: #b2e0dc; border-radius: 6px 6px 0 0; }
+.filter-section[open] { border: 1px solid #b2e0dc; border-radius: 6px; }
+
+.filter-summary-icon::after { content: '▸'; font-size: 10px; transition: transform 0.2s; display: inline-block; }
+.filter-section[open] .filter-summary-icon::after { transform: rotate(90deg); }
+
+.filter-body {
+    padding: 8px 8px 4px;
+    background: white;
+    border-top: 1px solid #e8f4f3;
+}
+
+/* ===== Sidebar light dropdown ===== */
 .sidebar-light .Select-control {
     background-color: #fff !important;
     border: 1px solid #e2e8f0 !important;
-    border-radius: 6px !important;
-    min-height: 30px !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+    border-radius: 5px !important;
+    min-height: 28px !important;
+    box-shadow: none !important;
 }
-.sidebar-light .Select-control:hover {
-    border-color: #0d9488 !important;
-}
+.sidebar-light .Select-control:hover { border-color: #0d9488 !important; }
 .sidebar-light .Select-value-label,
 .sidebar-light .Select--single > .Select-control .Select-value .Select-value-label {
     color: #334155 !important;
     font-weight: 500 !important;
+    font-size: 10px !important;
+    line-height: 26px !important;
 }
+.sidebar-light .Select-placeholder { font-size: 10px !important; line-height: 26px !important; }
+.sidebar-light .Select-input { height: 26px !important; }
 .sidebar-light .Select-menu-outer {
     border: 1px solid #e2e8f0 !important;
     border-radius: 0 0 6px 6px !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-    z-index: 1000 !important;
+    z-index: 9999 !important;
 }
 .sidebar-light .VirtualizedSelectFocusedOption {
     background-color: #f0fdfa !important;
@@ -34,20 +108,27 @@
 .sidebar-light::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
 /* ===== Chart card hover ===== */
-.chart-card {
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
+.chart-card { transition: box-shadow 0.2s ease, transform 0.15s ease; }
 .chart-card:hover {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.09) !important;
     transform: translateY(-1px);
 }
 
-/* ===== Hide Vega action buttons ===== */
+/* ===== Vega actions hidden ===== */
 .vega-embed .vega-actions { display: none !important; }
 
-/* ===== Reset button hover ===== */
+/* ===== Reset button ===== */
 #reset-button:hover {
     background-color: #0d9488 !important;
     color: white !important;
     border-color: #0d9488 !important;
+}
+
+/* ===== Filter label ===== */
+.filter-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 2px;
+    display: block;
 }

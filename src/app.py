@@ -62,21 +62,22 @@ FONT = '"DM Sans", sans-serif'
 HEADER_H = '52px'
 SIDEBAR_W = '208px'
 
-# Sidebar helpers
-_section = lambda label, color: html.Div([
-    html.Div(style={'width': '3px', 'height': '12px', 'backgroundColor': color,
-                     'borderRadius': '2px', 'marginRight': '6px', 'flexShrink': '0'}),
-    html.Span(label),
-], style={'display': 'flex', 'alignItems': 'center',
-          'fontSize': '10px', 'fontWeight': '700', 'color': '#475569',
-          'letterSpacing': '1px', 'textTransform': 'uppercase',
-          'margin': '14px 0 6px'})
+_dd_style = {'fontSize': '10px', 'marginBottom': '6px'}
 
-_label = lambda text: html.Label(text, style={
-    'fontSize': '10px', 'fontWeight': '600', 'color': '#64748b',
-    'marginBottom': '2px', 'display': 'block'})
-
-_dd_style = {'fontSize': '10px', 'marginBottom': '7px'}
+def _filter_group(title, color, children, open_default=False):
+    """Collapsible filter section using native HTML <details>"""
+    return html.Details([
+        html.Summary([
+            html.Span([
+                html.Span(style={'width': '3px', 'height': '10px', 'backgroundColor': color,
+                                  'borderRadius': '2px', 'display': 'inline-block',
+                                  'marginRight': '6px', 'verticalAlign': 'middle'}),
+                title,
+            ]),
+            html.Span(className='filter-summary-icon'),
+        ], className=''),
+        html.Div(children, className='filter-body'),
+    ], open=open_default, className='filter-section')
 
 # Chart card
 CARD = {'flex': '1', 'minWidth': '0', 'padding': '8px', 'backgroundColor': 'white',
@@ -110,60 +111,88 @@ app.layout = html.Div([
         # ===== SIDEBAR =====
         html.Div([
             html.Div([
-                _section('Demographics', '#0d9488'),
-                _label('Province'),
-                dcc.Dropdown(id='province-filter',
-                             options=[{'label': p, 'value': p} for p in filter_options.get('provinces', ['All'])] if data_loaded else [],
-                             value='All', clearable=False, style=_dd_style),
-                _label('Age'),
-                dcc.Dropdown(id='age-filter',
-                             options=[{'label': a, 'value': a} for a in filter_options.get('age_groups', ['All'])] if data_loaded else [],
-                             value='All', clearable=False, style=_dd_style),
-                _label('Gender'),
-                dcc.Dropdown(id='gender-filter',
-                             options=[{'label': g, 'value': g} for g in filter_options.get('genders', ['All'])] if data_loaded else [],
-                             value='All', clearable=False, style=_dd_style),
 
-                _section('Socioeconomic', '#0891b2'),
-                _label('Education'),
-                dcc.Dropdown(id='education-filter',
-                             options=[{'label': e, 'value': e} for e in filter_options.get('educations', ['All'])] if data_loaded else [],
-                             value='All', clearable=False, style=_dd_style),
-                _label('Marital'),
-                dcc.Dropdown(id='marital-filter',
-                             options=[{'label': m, 'value': m} for m in filter_options.get('maritals', ['All'])] if data_loaded else [],
-                             value='All', clearable=False, style=_dd_style),
-                _label('Income'),
-                dcc.Dropdown(id='income-filter',
-                             options=[{'label': i, 'value': i} for i in filter_options.get('incomes', ['All'])] if data_loaded else [],
-                             value='All', clearable=False, style=_dd_style),
+                # --- Health Focus pills (most prominent) ---
+                html.Div('Health Focus', className='filter-label'),
+                dcc.RadioItems(
+                    id='health-focus',
+                    options=[
+                        {'label': 'Physical', 'value': 'Physical Health'},
+                        {'label': 'Mental',   'value': 'Mental Health'},
+                        {'label': 'Lifestyle','value': 'Lifestyle Behaviors'},
+                    ],
+                    value='Physical Health',
+                    className='radio-pills',
+                    inputStyle={'display': 'none'},
+                ),
 
-                _section('Identity', '#d97706'),
-                _label('Immigrant'),
-                dcc.Dropdown(id='immigrant-filter',
-                             options=[{'label': i, 'value': i} for i in filter_options.get('immigrant', ['All'])] if data_loaded else [],
-                             value='All', clearable=False, style=_dd_style),
-                _label('Aboriginal'),
-                dcc.Dropdown(id='aboriginal-filter',
-                             options=[{'label': a, 'value': a} for a in filter_options.get('aboriginal', ['All'])] if data_loaded else [],
-                             value='All', clearable=False, style=_dd_style),
+                # --- Compare By pills ---
+                html.Div('Compare By', className='filter-label', style={'marginTop': '8px'}),
+                dcc.RadioItems(
+                    id='compare-by',
+                    options=[
+                        {'label': 'Income',    'value': 'Income'},
+                        {'label': 'Education', 'value': 'Education'},
+                        {'label': 'Age',       'value': 'Age'},
+                        {'label': 'Gender',    'value': 'Gender'},
+                    ],
+                    value='Income',
+                    className='radio-pills',
+                    inputStyle={'display': 'none'},
+                ),
 
-                _section('Analysis', '#7c3aed'),
-                _label('Health Focus'),
-                dcc.Dropdown(id='health-focus',
-                             options=[{'label': h, 'value': h} for h in filter_options.get('health_focus', [])] if data_loaded else [],
-                             value='Physical Health', clearable=False, style=_dd_style),
-                _label('Compare By'),
-                dcc.Dropdown(id='compare-by',
-                             options=[{'label': c, 'value': c} for c in filter_options.get('compare_by', [])] if data_loaded else [],
-                             value='Income', clearable=False, style=_dd_style),
+                html.Hr(style={'border': 'none', 'borderTop': '1px solid #e2e8f0',
+                               'margin': '12px 0 10px'}),
+
+                # --- Collapsible filter groups ---
+                _filter_group('Demographics', '#0d9488', [
+                    html.Label('Province', className='filter-label'),
+                    dcc.Dropdown(id='province-filter',
+                                 options=[{'label': p, 'value': p} for p in filter_options.get('provinces', ['All'])] if data_loaded else [],
+                                 value='All', clearable=False, style=_dd_style),
+                    html.Label('Age', className='filter-label'),
+                    dcc.Dropdown(id='age-filter',
+                                 options=[{'label': a, 'value': a} for a in filter_options.get('age_groups', ['All'])] if data_loaded else [],
+                                 value='All', clearable=False, style=_dd_style),
+                    html.Label('Gender', className='filter-label'),
+                    dcc.Dropdown(id='gender-filter',
+                                 options=[{'label': g, 'value': g} for g in filter_options.get('genders', ['All'])] if data_loaded else [],
+                                 value='All', clearable=False, style=_dd_style),
+                ], open_default=True),
+
+                _filter_group('Socioeconomic', '#0891b2', [
+                    html.Label('Education', className='filter-label'),
+                    dcc.Dropdown(id='education-filter',
+                                 options=[{'label': e, 'value': e} for e in filter_options.get('educations', ['All'])] if data_loaded else [],
+                                 value='All', clearable=False, style=_dd_style),
+                    html.Label('Marital Status', className='filter-label'),
+                    dcc.Dropdown(id='marital-filter',
+                                 options=[{'label': m, 'value': m} for m in filter_options.get('maritals', ['All'])] if data_loaded else [],
+                                 value='All', clearable=False, style=_dd_style),
+                    html.Label('Income', className='filter-label'),
+                    dcc.Dropdown(id='income-filter',
+                                 options=[{'label': i, 'value': i} for i in filter_options.get('incomes', ['All'])] if data_loaded else [],
+                                 value='All', clearable=False, style=_dd_style),
+                ], open_default=False),
+
+                _filter_group('Identity', '#d97706', [
+                    html.Label('Immigrant', className='filter-label'),
+                    dcc.Dropdown(id='immigrant-filter',
+                                 options=[{'label': i, 'value': i} for i in filter_options.get('immigrant', ['All'])] if data_loaded else [],
+                                 value='All', clearable=False, style=_dd_style),
+                    html.Label('Aboriginal', className='filter-label'),
+                    dcc.Dropdown(id='aboriginal-filter',
+                                 options=[{'label': a, 'value': a} for a in filter_options.get('aboriginal', ['All'])] if data_loaded else [],
+                                 value='All', clearable=False, style=_dd_style),
+                ], open_default=False),
 
                 html.Button('Reset All Filters', id='reset-button', n_clicks=0,
                             style={'width': '100%', 'padding': '7px 0', 'marginTop': '10px',
                                    'backgroundColor': 'transparent', 'color': '#0d9488',
                                    'border': '1.5px solid #0d9488', 'borderRadius': '6px',
                                    'cursor': 'pointer', 'fontSize': '11px', 'fontWeight': '600'}),
-            ], style={'padding': '6px 12px 16px'})
+
+            ], style={'padding': '10px 10px 16px'})
         ], className='sidebar-light', style={
             'width': SIDEBAR_W, 'minWidth': SIDEBAR_W, 'maxWidth': SIDEBAR_W,
             'backgroundColor': '#f8fafc',
