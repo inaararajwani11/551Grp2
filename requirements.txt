@@ -3,4 +3,5 @@ dash-vega-components
 pandas
 altair==5.1.2
 vega-datasets==0.9.0
+dash-vega-components>=0.0.11
 gunicorn==21.2.0
