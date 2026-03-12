@@ -20,6 +20,21 @@ QUAL_PALETTE = [
 
 # ========== HELPER FUNCTIONS ==========
 
+def create_no_data_message(message="Insufficient data for this filter combination"):
+    """Create a friendly no-data message chart"""
+    return {
+        "data": {"values": [{"x": 0, "y": 0}]},
+        "mark": {"type": "text", "fontSize": 13, "color": "#64748b"},
+        "encoding": {
+            "text": {"value": message},
+            "x": {"field": "x", "type": "quantitative", "axis": None},
+            "y": {"field": "y", "type": "quantitative", "axis": None}
+        },
+        "config": {"view": {"strokeWidth": 0}},
+        "width": "container",
+        "height": "container"
+    }
+
 def get_compare_column(compare_by):
     """Get the actual column name for compare_by"""
     mapping = {
@@ -49,7 +64,7 @@ def create_chart1(df, health_focus='Physical Health', compare_by='Income'):
     """Chart 1: Health indicator distribution - stacked bar chart"""
     
     if len(df) == 0:
-        return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+        return create_no_data_message("No data available for selected filters")
     
     # Select outcome variable based on health_focus
     if health_focus == 'Physical Health':
@@ -75,7 +90,7 @@ def create_chart1(df, health_focus='Physical Health', compare_by='Income'):
     if outcome_var == 'Life_satisfaction':
         chart_df = df[(df[outcome_var].notna()) & (df[outcome_var] < 90) & (df[compare_col].notna())].copy()
         if len(chart_df) == 0:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No valid data"}}}
+            return create_no_data_message("Insufficient data for this age group")
         chart_df['satisfaction_level'] = pd.cut(chart_df[outcome_var], 
                                                bins=[-0.1, 3, 6, 10],
                                                labels=['Low (0-3)', 'Medium (4-6)', 'High (7-10)'])
@@ -85,7 +100,7 @@ def create_chart1(df, health_focus='Physical Health', compare_by='Income'):
         chart_df = df.dropna(subset=[outcome_var, compare_col])
     
     if len(chart_df) == 0:
-        return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+        return create_no_data_message("No data available for this filter combination")
     
     agg_df = chart_df.groupby([outcome_var, compare_col]).size().reset_index(name='count')
     
@@ -115,7 +130,7 @@ def create_chart2(df, health_focus='Physical Health', compare_by='Income'):
     """Chart 2: Relationship between two health variables"""
     
     if len(df) == 0:
-        return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+        return create_no_data_message("No data available for selected filters")
     
     compare_col = get_compare_column(compare_by)
     compare_order = get_compare_order(compare_by)
@@ -128,7 +143,7 @@ def create_chart2(df, health_focus='Physical Health', compare_by='Income'):
         
         chart_df = df.dropna(subset=[y_var, compare_col])
         if len(chart_df) == 0:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+            return create_no_data_message("No data available for this filter combination")
         
         agg_df = chart_df.groupby([y_var, compare_col]).size().reset_index(name='count')
         
@@ -153,7 +168,7 @@ def create_chart2(df, health_focus='Physical Health', compare_by='Income'):
         
         chart_df = df.dropna(subset=[x_var, compare_col])
         if len(chart_df) == 0:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+            return create_no_data_message("No data available for this filter combination")
         
         agg_df = chart_df.groupby([x_var, compare_col]).size().reset_index(name='count')
         
@@ -178,7 +193,7 @@ def create_chart2(df, health_focus='Physical Health', compare_by='Income'):
                      (df[y_var].notna()) & (df[y_var] < 90) &
                      (df[compare_col].notna())].copy()
         if len(chart_df) < 10:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Insufficient data"}}}
+            return create_no_data_message("Insufficient data (need at least 5 samples per group)")
         
         if len(chart_df) > 2000:
             chart_df = chart_df.sample(n=2000, random_state=42)
@@ -211,7 +226,7 @@ def create_chart3(df, health_focus='Physical Health', compare_by='Income'):
     """Chart 3: Condition prevalence heatmap"""
     
     if len(df) == 0:
-        return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+        return create_no_data_message("No data available for selected filters")
     
     compare_col = get_compare_column(compare_by)
     
@@ -239,7 +254,7 @@ def create_chart3(df, health_focus='Physical Health', compare_by='Income'):
                 data_list.append({'Condition': cond_short, 'Group': compare_val, 'Prevalence': prevalence})
     
     if not data_list:
-        return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+        return create_no_data_message("No data available for this filter combination")
     
     heatmap_df = pd.DataFrame(data_list)
     
@@ -280,7 +295,7 @@ def create_chart4(df, health_focus='Physical Health', compare_by='Income'):
     """Chart 4: Grouped comparison bar chart"""
     
     if len(df) == 0:
-        return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+        return create_no_data_message("No data available for selected filters")
     
     compare_col = get_compare_column(compare_by)
     
@@ -292,11 +307,11 @@ def create_chart4(df, health_focus='Physical Health', compare_by='Income'):
         
         required = [x_var, color_var]
         if not all(c in df.columns for c in required):
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Data unavailable"}}}
+            return create_no_data_message("Data unavailable for this combination")
         
         chart_df = df.dropna(subset=required)
         if len(chart_df) == 0:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+            return create_no_data_message("No data available for this filter combination")
         
         agg_df = chart_df.groupby([x_var, color_var]).size().reset_index(name='count')
         
@@ -316,11 +331,11 @@ def create_chart4(df, health_focus='Physical Health', compare_by='Income'):
         
         required = [x_var, color_var]
         if not all(c in df.columns for c in required):
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Data unavailable"}}}
+            return create_no_data_message("Data unavailable for this combination")
         
         chart_df = df.dropna(subset=required)
         if len(chart_df) == 0:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+            return create_no_data_message("No data available for this filter combination")
         
         agg_df = chart_df.groupby([x_var, color_var]).size().reset_index(name='count')
         
@@ -337,11 +352,11 @@ def create_chart4(df, health_focus='Physical Health', compare_by='Income'):
         title = 'Physical Activity Levels'
         
         if x_var not in df.columns or compare_col not in df.columns:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Data unavailable"}}}
+            return create_no_data_message("Data unavailable for this combination")
         
         chart_df = df[(df[x_var].notna()) & (df[x_var] < 9000) & (df[compare_col].notna())].copy()
         if len(chart_df) == 0:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No valid data"}}}
+            return create_no_data_message("Insufficient data for this age group")
         
         chart_df['activity_level'] = pd.cut(chart_df[x_var], 
                                             bins=[-0.1, 150, 300, 10000],
@@ -376,7 +391,7 @@ def create_chart5(df, health_focus='Physical Health', compare_by='Income'):
     """Chart 5: Bubble or relationship chart"""
     
     if len(df) == 0:
-        return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+        return create_no_data_message("No data available for selected filters")
     
     compare_col = get_compare_column(compare_by)
     
@@ -387,13 +402,13 @@ def create_chart5(df, health_focus='Physical Health', compare_by='Income'):
         title = 'Physical Activity by Age'
         
         if y_var not in df.columns or 'Age_group' not in df.columns or compare_col not in df.columns:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Data unavailable"}}}
+            return create_no_data_message("Data unavailable for this combination")
         
         chart_df = df[(df[y_var].notna()) & (df[y_var] < 9000) & 
                      (df['Age_group'].notna()) & (df[compare_col].notna())].copy()
         
         if len(chart_df) == 0:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No valid data"}}}
+            return create_no_data_message("Insufficient data for this age group")
         
         # When compare_by is Age, avoid duplicate groupby on same column
         same_as_x = (compare_col == 'Age_group')
@@ -427,20 +442,20 @@ def create_chart5(df, health_focus='Physical Health', compare_by='Income'):
         
         required = [x_var, y_var, compare_col]
         if not all(c in df.columns for c in required):
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Data unavailable"}}}
+            return create_no_data_message("Data unavailable for this combination")
         
         chart_df = df[(df[x_var].notna()) & (df[y_var].notna()) & 
                      (df[y_var] < 90) & (df[compare_col].notna())].copy()
         
         if len(chart_df) == 0:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No valid data"}}}
+            return create_no_data_message("Insufficient data for this age group")
         
         agg_df = chart_df.groupby([x_var, compare_col])[y_var].mean().reset_index(name='avg_satisfaction')
         agg_df['count'] = chart_df.groupby([x_var, compare_col]).size().values
         agg_df = agg_df[agg_df['count'] >= 5]
         
         if len(agg_df) == 0:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Insufficient data"}}}
+            return create_no_data_message("Insufficient data (need at least 5 samples per group)")
         
         chart = alt.Chart(agg_df).mark_circle(opacity=0.7).encode(
             x=alt.X(f'{x_var}:N', title='Work Stress', 
@@ -465,14 +480,14 @@ def create_chart5(df, health_focus='Physical Health', compare_by='Income'):
         x_var_actual = 'Work_hours '  # Original has space
         
         if x_var_actual not in df.columns or y_var not in df.columns or compare_col not in df.columns:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Data unavailable"}}}
+            return create_no_data_message("Data unavailable for this combination")
         
         chart_df = df[(df[x_var_actual].notna()) & (df[x_var_actual] < 90) &
                      (df[y_var].notna()) & (df[y_var] < 900) &
                      (df[compare_col].notna())].copy()
         
         if len(chart_df) == 0:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No valid data"}}}
+            return create_no_data_message("Insufficient data for this age group")
         
         # Create bins
         chart_df['work_hours_bin'] = pd.cut(chart_df[x_var_actual],
@@ -511,7 +526,7 @@ def create_chart6(df, health_focus='Physical Health', compare_by='Income'):
     """Chart 6: Provincial health risk ranking"""
     
     if len(df) == 0:
-        return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+        return create_no_data_message("No data available for selected filters")
     
     if 'Province' not in df.columns:
         return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Province data unavailable"}}}
@@ -526,7 +541,7 @@ def create_chart6(df, health_focus='Physical Health', compare_by='Income'):
         subtitle = '% Fair/Poor Health'
         
         if outcome_var not in df.columns:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Data unavailable"}}}
+            return create_no_data_message("Data unavailable for this combination")
         
         for province in df['Province'].dropna().unique():
             prov_df = df[(df['Province'] == province) & (df[outcome_var].notna())]
@@ -542,7 +557,7 @@ def create_chart6(df, health_focus='Physical Health', compare_by='Income'):
         subtitle = '% High Stress'
         
         if outcome_var not in df.columns:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Data unavailable"}}}
+            return create_no_data_message("Data unavailable for this combination")
         
         for province in df['Province'].dropna().unique():
             prov_df = df[(df['Province'] == province) & (df[outcome_var].notna())]
@@ -557,7 +572,7 @@ def create_chart6(df, health_focus='Physical Health', compare_by='Income'):
         subtitle = '% Low Life Satisfaction'
         
         if outcome_var not in df.columns:
-            return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Data unavailable"}}}
+            return create_no_data_message("Data unavailable for this combination")
         
         for province in df['Province'].dropna().unique():
             prov_df = df[(df['Province'] == province) & 
@@ -568,7 +583,7 @@ def create_chart6(df, health_focus='Physical Health', compare_by='Income'):
                 risk_data.append({'Province': province, 'Risk_Score': risk_pct})
     
     if not risk_data:
-        return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "No data"}}}
+        return create_no_data_message("No data available for this filter combination")
     
     risk_df = pd.DataFrame(risk_data).sort_values('Risk_Score', ascending=False)
     
