@@ -33,7 +33,25 @@ except Exception as e:
 AGE_GROUP_MAP = {'12-19': 1, '20-34': 2, '35-49': 3, '50-64': 4, '65+': 5}
 
 def apply_global_filters(df_in, province, age_group, gender, education, marital, income, immigrant, aboriginal):
-    """Apply global filters to dataframe"""
+    """Apply global filters to dataframe.
+
+    Filters the DataFrame based on sidebar selections. Any parameter set
+    to 'All' (or falsy) leaves the corresponding dimension unfiltered.
+
+    Args:
+        df_in (pd.DataFrame): The full processed survey DataFrame.
+        province (str): Selected province, or 'All'.
+        age_group (str): Selected age group label (e.g. '20-34'), or 'All'.
+        gender (str): Selected gender, or 'All'.
+        education (str): Selected education level, or 'All'.
+        marital (str): Selected marital status, or 'All'.
+        income (str): Selected income bracket, or 'All'.
+        immigrant (str): Selected immigrant status, or 'All'.
+        aboriginal (str): Selected aboriginal identity, or 'All'.
+
+    Returns:
+        pd.DataFrame: Filtered copy of the input DataFrame.
+    """
     filtered_df = df_in.copy()
 
     if province and province != "All":
@@ -67,7 +85,19 @@ SIDEBAR_W = '230px'
 _dd_style = {'fontSize': '10px', 'marginBottom': '6px'}
 
 def _filter_group(title, color, children, open_default=False):
-    """Collapsible filter section using native HTML <details>"""
+    """Create a collapsible filter section using native HTML <details>.
+
+    Args:
+        title (str): Label displayed in the <summary> header.
+        color (str): CSS colour string for the left accent bar.
+        children (list): Dash component list rendered inside the
+            collapsible body.
+        open_default (bool): Whether the section starts expanded.
+            Defaults to False.
+
+    Returns:
+        dash.html.Details: A styled collapsible filter group component.
+    """
     return html.Details([
         html.Summary([
             html.Span([
@@ -275,6 +305,18 @@ app.layout = html.Div([
     [Input('reset-button', 'n_clicks')]
 )
 def reset_all(n_clicks):
+    """Reset all filters and controls to their default values.
+
+    Args:
+        n_clicks (int): Number of times the reset button has been clicked
+            (provided by Dash; not used directly).
+
+    Returns:
+        tuple: Default values for all 10 filter outputs in order:
+            province, age, gender, education, marital, income, immigrant,
+            aboriginal (all 'All'), health_focus ('Physical Health'),
+            compare_by ('Income').
+    """
     return 'All', 'All', 'All', 'All', 'All', 'All', 'All', 'All', 'Physical Health', 'Income'
 
 
@@ -287,6 +329,25 @@ ALL_INPUTS = [
 
 @app.callback(Output('chart1', 'spec'), ALL_INPUTS)
 def update_chart1(province, age, gender, edu, marital, income, imm, ab, health_focus, compare_by):
+    """Update chart 1 (health indicator distribution stacked bar) based on current filter selections.
+
+    Args:
+        province (str): Selected province filter value.
+        age (str): Selected age group filter value.
+        gender (str): Selected gender filter value.
+        edu (str): Selected education level filter value.
+        marital (str): Selected marital status filter value.
+        income (str): Selected income bracket filter value.
+        imm (str): Selected immigrant status filter value.
+        ab (str): Selected aboriginal identity filter value.
+        health_focus (str): Selected health theme ('Physical Health',
+            'Mental Health', or 'Lifestyle Behaviors').
+        compare_by (str): Selected comparison variable ('Income',
+            'Education', 'Age', or 'Gender').
+
+    Returns:
+        dict: Vega-Lite chart spec for chart 1.
+    """
     if not data_loaded:
         return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Loading..."}}}
     try:
@@ -297,6 +358,25 @@ def update_chart1(province, age, gender, edu, marital, income, imm, ab, health_f
 
 @app.callback(Output('chart2', 'spec'), ALL_INPUTS)
 def update_chart2(province, age, gender, edu, marital, income, imm, ab, health_focus, compare_by):
+    """Update chart 2 (relationship between two health variables) based on current filter selections.
+
+    Args:
+        province (str): Selected province filter value.
+        age (str): Selected age group filter value.
+        gender (str): Selected gender filter value.
+        edu (str): Selected education level filter value.
+        marital (str): Selected marital status filter value.
+        income (str): Selected income bracket filter value.
+        imm (str): Selected immigrant status filter value.
+        ab (str): Selected aboriginal identity filter value.
+        health_focus (str): Selected health theme ('Physical Health',
+            'Mental Health', or 'Lifestyle Behaviors').
+        compare_by (str): Selected comparison variable ('Income',
+            'Education', 'Age', or 'Gender').
+
+    Returns:
+        dict: Vega-Lite chart spec for chart 2.
+    """
     if not data_loaded:
         return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Loading..."}}}
     try:
@@ -307,6 +387,25 @@ def update_chart2(province, age, gender, edu, marital, income, imm, ab, health_f
 
 @app.callback(Output('chart3', 'spec'), ALL_INPUTS)
 def update_chart3(province, age, gender, edu, marital, income, imm, ab, health_focus, compare_by):
+    """Update chart 3 (condition prevalence heatmap) based on current filter selections.
+
+    Args:
+        province (str): Selected province filter value.
+        age (str): Selected age group filter value.
+        gender (str): Selected gender filter value.
+        edu (str): Selected education level filter value.
+        marital (str): Selected marital status filter value.
+        income (str): Selected income bracket filter value.
+        imm (str): Selected immigrant status filter value.
+        ab (str): Selected aboriginal identity filter value.
+        health_focus (str): Selected health theme ('Physical Health',
+            'Mental Health', or 'Lifestyle Behaviors').
+        compare_by (str): Selected comparison variable ('Income',
+            'Education', 'Age', or 'Gender').
+
+    Returns:
+        dict: Vega-Lite chart spec for chart 3.
+    """
     if not data_loaded:
         return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Loading..."}}}
     try:
@@ -317,6 +416,25 @@ def update_chart3(province, age, gender, edu, marital, income, imm, ab, health_f
 
 @app.callback(Output('chart4', 'spec'), ALL_INPUTS)
 def update_chart4(province, age, gender, edu, marital, income, imm, ab, health_focus, compare_by):
+    """Update chart 4 (grouped comparison bar chart) based on current filter selections.
+
+    Args:
+        province (str): Selected province filter value.
+        age (str): Selected age group filter value.
+        gender (str): Selected gender filter value.
+        edu (str): Selected education level filter value.
+        marital (str): Selected marital status filter value.
+        income (str): Selected income bracket filter value.
+        imm (str): Selected immigrant status filter value.
+        ab (str): Selected aboriginal identity filter value.
+        health_focus (str): Selected health theme ('Physical Health',
+            'Mental Health', or 'Lifestyle Behaviors').
+        compare_by (str): Selected comparison variable ('Income',
+            'Education', 'Age', or 'Gender').
+
+    Returns:
+        dict: Vega-Lite chart spec for chart 4.
+    """
     if not data_loaded:
         return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Loading..."}}}
     try:
@@ -327,6 +445,25 @@ def update_chart4(province, age, gender, edu, marital, income, imm, ab, health_f
 
 @app.callback(Output('chart5', 'spec'), ALL_INPUTS)
 def update_chart5(province, age, gender, edu, marital, income, imm, ab, health_focus, compare_by):
+    """Update chart 5 (bubble/relationship chart) based on current filter selections.
+
+    Args:
+        province (str): Selected province filter value.
+        age (str): Selected age group filter value.
+        gender (str): Selected gender filter value.
+        edu (str): Selected education level filter value.
+        marital (str): Selected marital status filter value.
+        income (str): Selected income bracket filter value.
+        imm (str): Selected immigrant status filter value.
+        ab (str): Selected aboriginal identity filter value.
+        health_focus (str): Selected health theme ('Physical Health',
+            'Mental Health', or 'Lifestyle Behaviors').
+        compare_by (str): Selected comparison variable ('Income',
+            'Education', 'Age', or 'Gender').
+
+    Returns:
+        dict: Vega-Lite chart spec for chart 5.
+    """
     if not data_loaded:
         return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Loading..."}}}
     try:
@@ -337,6 +474,25 @@ def update_chart5(province, age, gender, edu, marital, income, imm, ab, health_f
 
 @app.callback(Output('chart6', 'spec'), ALL_INPUTS)
 def update_chart6(province, age, gender, edu, marital, income, imm, ab, health_focus, compare_by):
+    """Update chart 6 (provincial health risk ranking) based on current filter selections.
+
+    Args:
+        province (str): Selected province filter value.
+        age (str): Selected age group filter value.
+        gender (str): Selected gender filter value.
+        edu (str): Selected education level filter value.
+        marital (str): Selected marital status filter value.
+        income (str): Selected income bracket filter value.
+        imm (str): Selected immigrant status filter value.
+        ab (str): Selected aboriginal identity filter value.
+        health_focus (str): Selected health theme ('Physical Health',
+            'Mental Health', or 'Lifestyle Behaviors').
+        compare_by (str): Selected comparison variable ('Income',
+            'Education', 'Age', or 'Gender').
+
+    Returns:
+        dict: Vega-Lite chart spec for chart 6.
+    """
     if not data_loaded:
         return {"data": {"values": []}, "mark": "text", "encoding": {"text": {"value": "Loading..."}}}
     try:

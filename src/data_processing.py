@@ -7,7 +7,18 @@ import os
 
 
 def load_data():
-    """Load and process health survey data"""
+    """Load and process health survey data.
+
+    Reads the raw CSV from data/processed/clean_health_data.csv, decodes
+    numeric codes into human-readable text labels, and derives binary
+    indicator columns for lifestyle behaviours.
+
+    Returns:
+        pd.DataFrame: Processed survey DataFrame with added text columns
+            (Age_group, Edu_level_text, Marital_status_text, Smoked_bin,
+            Cannabis_bin, Drug_bin) and normalised Immigrant /
+            Aboriginal_identity labels.
+    """
     
     data_path = os.path.join('data', 'processed', 'clean_health_data.csv')
     df = pd.read_csv(data_path)
@@ -58,7 +69,20 @@ def load_data():
 
 
 def get_filter_options(df):
-    """Get unique values for filter dropdowns"""
+    """Get unique values for filter dropdowns.
+
+    Extracts and orders the distinct category values for each sidebar
+    filter from the processed DataFrame, prepending 'All' to each list.
+
+    Args:
+        df (pd.DataFrame): Processed survey DataFrame returned by load_data().
+
+    Returns:
+        dict: Mapping of filter name to ordered list of option strings.
+            Keys: 'provinces', 'age_groups', 'genders', 'educations',
+            'maritals', 'incomes', 'immigrant', 'aboriginal',
+            'health_focus', 'compare_by'.
+    """
     
     # 定義順序（只保留資料中實際存在的）
     all_incomes = [

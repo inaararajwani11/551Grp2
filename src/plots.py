@@ -21,7 +21,15 @@ QUAL_PALETTE = [
 # ========== HELPER FUNCTIONS ==========
 
 def create_no_data_message(message="Insufficient data for this filter combination"):
-    """Create a friendly no-data message chart"""
+    """Create a friendly no-data message chart.
+
+    Args:
+        message (str): Text to display in the chart area. Defaults to
+            "Insufficient data for this filter combination".
+
+    Returns:
+        dict: Vega-Lite spec that renders the message as centred text.
+    """
     return {
         "data": {"values": [{"x": 0, "y": 0}]},
         "mark": {"type": "text", "fontSize": 13, "color": "#64748b"},
@@ -36,7 +44,16 @@ def create_no_data_message(message="Insufficient data for this filter combinatio
     }
 
 def get_compare_column(compare_by):
-    """Get the actual column name for compare_by"""
+    """Get the actual column name for compare_by.
+
+    Args:
+        compare_by (str): Display label for the comparison variable.
+            One of 'Income', 'Education', 'Age', 'Gender'.
+
+    Returns:
+        str: Corresponding DataFrame column name. Defaults to
+            'Total_income' if the label is not recognised.
+    """
     mapping = {
         'Income': 'Total_income',
         'Education': 'Edu_level_text',  # 修正：使用 _text 版本
@@ -47,7 +64,16 @@ def get_compare_column(compare_by):
 
 
 def get_compare_order(compare_by):
-    """Get the sort order for compare_by variable"""
+    """Get the sort order for compare_by variable.
+
+    Args:
+        compare_by (str): Display label for the comparison variable.
+            One of 'Income', 'Education', 'Age', 'Gender'.
+
+    Returns:
+        list[str] or None: Ordered list of category values for Altair
+            sort encoding. Returns None if the label is not recognised.
+    """
     orders = {
         'Income': ['Less than $20,000', '$20,000 to $39,999', '$40,000 to $59,999',
                   '$60,000 to $79,999', '$80,000 to $99,999', '$100,000 to $149,999', '$150,000 or more'],
@@ -61,7 +87,25 @@ def get_compare_order(compare_by):
 # ========== CHART 1: Main Health Indicator Distribution ==========
 
 def create_chart1(df, health_focus='Physical Health', compare_by='Income'):
-    """Chart 1: Health indicator distribution - stacked bar chart"""
+    """Create chart 1: health indicator distribution as a stacked bar chart.
+
+    Displays the distribution of the primary health outcome (general health,
+    mental health, or life satisfaction) stacked by the chosen comparison
+    demographic variable.
+
+    Args:
+        df (pd.DataFrame): Filtered survey DataFrame.
+        health_focus (str): Health theme to visualise. One of
+            'Physical Health', 'Mental Health', 'Lifestyle Behaviors'.
+            Defaults to 'Physical Health'.
+        compare_by (str): Demographic variable used for colour grouping.
+            One of 'Income', 'Education', 'Age', 'Gender'.
+            Defaults to 'Income'.
+
+    Returns:
+        dict: Vega-Lite chart spec, or a no-data message spec if the
+            filtered DataFrame is empty or required columns are missing.
+    """
     
     if len(df) == 0:
         return create_no_data_message("No data available for selected filters")
@@ -127,7 +171,26 @@ def create_chart1(df, health_focus='Physical Health', compare_by='Income'):
 # ========== CHART 2: Two-Variable Relationship ==========
 
 def create_chart2(df, health_focus='Physical Health', compare_by='Income'):
-    """Chart 2: Relationship between two health variables"""
+    """Create chart 2: relationship between two health variables.
+
+    Chart type varies by health focus: grouped bar for physical health
+    (health status by compare_by), grouped bar for mental health (stress
+    level distribution), or scatter plot for lifestyle (diet vs life
+    satisfaction).
+
+    Args:
+        df (pd.DataFrame): Filtered survey DataFrame.
+        health_focus (str): Health theme to visualise. One of
+            'Physical Health', 'Mental Health', 'Lifestyle Behaviors'.
+            Defaults to 'Physical Health'.
+        compare_by (str): Demographic variable used for colour grouping.
+            One of 'Income', 'Education', 'Age', 'Gender'.
+            Defaults to 'Income'.
+
+    Returns:
+        dict: Vega-Lite chart spec, or a no-data message spec if the
+            filtered DataFrame is empty or required columns are missing.
+    """
     
     if len(df) == 0:
         return create_no_data_message("No data available for selected filters")
@@ -223,7 +286,27 @@ def create_chart2(df, health_focus='Physical Health', compare_by='Income'):
 # ========== CHART 3: Heatmap ==========
 
 def create_chart3(df, health_focus='Physical Health', compare_by='Income'):
-    """Chart 3: Condition prevalence heatmap"""
+    """Create chart 3: condition prevalence heatmap.
+
+    Displays the prevalence (%) of health or lifestyle conditions for each
+    group of the comparison variable as a colour-encoded heatmap with
+    numeric annotations.
+
+    Args:
+        df (pd.DataFrame): Filtered survey DataFrame.
+        health_focus (str): Determines which conditions are shown.
+            'Physical Health' → chronic conditions (hypertension, diabetes,
+            cardiovascular); 'Mental Health' → mood & anxiety disorders;
+            'Lifestyle Behaviors' → substance use (smoking, cannabis, drugs).
+            Defaults to 'Physical Health'.
+        compare_by (str): Demographic variable used for the y-axis grouping.
+            One of 'Income', 'Education', 'Age', 'Gender'.
+            Defaults to 'Income'.
+
+    Returns:
+        dict: Vega-Lite chart spec, or a no-data message spec if the
+            filtered DataFrame is empty or required columns are missing.
+    """
     
     if len(df) == 0:
         return create_no_data_message("No data available for selected filters")
@@ -292,7 +375,25 @@ def create_chart3(df, health_focus='Physical Health', compare_by='Income'):
 # ========== CHART 4: Grouped Comparison ==========
 
 def create_chart4(df, health_focus='Physical Health', compare_by='Income'):
-    """Chart 4: Grouped comparison bar chart"""
+    """Create chart 4: grouped comparison bar chart.
+
+    Shows cross-factor comparisons: food security × immigration status
+    (physical health), food security × sense of belonging (mental health),
+    or physical activity level distribution by compare_by (lifestyle).
+
+    Args:
+        df (pd.DataFrame): Filtered survey DataFrame.
+        health_focus (str): Health theme that determines which variables are
+            cross-tabulated. One of 'Physical Health', 'Mental Health',
+            'Lifestyle Behaviors'. Defaults to 'Physical Health'.
+        compare_by (str): Demographic variable used for grouping in lifestyle
+            mode. One of 'Income', 'Education', 'Age', 'Gender'.
+            Defaults to 'Income'.
+
+    Returns:
+        dict: Vega-Lite chart spec, or a no-data message spec if the
+            filtered DataFrame is empty or required columns are missing.
+    """
     
     if len(df) == 0:
         return create_no_data_message("No data available for selected filters")
@@ -388,7 +489,26 @@ def create_chart4(df, health_focus='Physical Health', compare_by='Income'):
 # ========== CHART 5: Bubble/Relationship Chart ==========
 
 def create_chart5(df, health_focus='Physical Health', compare_by='Income'):
-    """Chart 5: Bubble or relationship chart"""
+    """Create chart 5: bubble or relationship chart.
+
+    Bubble size encodes sample count; colour encodes the comparison variable.
+    Physical health: average physical activity by age group; mental health:
+    average life satisfaction by work stress level; lifestyle: average
+    alcohol consumption by work-hours category.
+
+    Args:
+        df (pd.DataFrame): Filtered survey DataFrame.
+        health_focus (str): Health theme that determines the x/y variables.
+            One of 'Physical Health', 'Mental Health', 'Lifestyle Behaviors'.
+            Defaults to 'Physical Health'.
+        compare_by (str): Demographic variable used for colour encoding.
+            One of 'Income', 'Education', 'Age', 'Gender'.
+            Defaults to 'Income'.
+
+    Returns:
+        dict: Vega-Lite chart spec, or a no-data message spec if the
+            filtered DataFrame is empty or required columns are missing.
+    """
     
     if len(df) == 0:
         return create_no_data_message("No data available for selected filters")
@@ -523,7 +643,25 @@ def create_chart5(df, health_focus='Physical Health', compare_by='Income'):
 # ========== CHART 6: Provincial Risk Ranking ==========
 
 def create_chart6(df, health_focus='Physical Health', compare_by='Income'):
-    """Chart 6: Provincial health risk ranking"""
+    """Create chart 6: provincial health risk ranking as a horizontal bar chart.
+
+    Ranks Canadian provinces by a risk score computed from the filtered data:
+    % fair/poor general health (physical), % high stress (mental), or
+    % low life satisfaction (lifestyle).
+
+    Args:
+        df (pd.DataFrame): Filtered survey DataFrame.
+        health_focus (str): Determines the risk metric. One of
+            'Physical Health', 'Mental Health', 'Lifestyle Behaviors'.
+            Defaults to 'Physical Health'.
+        compare_by (str): Not directly used in this chart but kept for
+            API consistency with the other chart functions.
+            Defaults to 'Income'.
+
+    Returns:
+        dict: Vega-Lite chart spec, or a no-data message spec if the
+            filtered DataFrame is empty or the Province column is absent.
+    """
     
     if len(df) == 0:
         return create_no_data_message("No data available for selected filters")
