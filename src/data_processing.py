@@ -7,18 +7,27 @@ import os
 
 
 def load_data(sample_fraction=None, random_state=42):
+    """Load and process health survey data.
+
+    Reads the raw CSV from data/processed/clean_health_data.csv, decodes
+    numeric codes into human-readable text labels, derives binary indicator
+    columns for lifestyle behaviours, and optimises memory by converting
+    low-cardinality string columns to the category dtype.
+
+    Args:
+        sample_fraction (float, optional): Fraction of rows to sample
+            (e.g. 0.1 = 10%, 1.0 = 100%). If None, auto-detects the
+            environment: Render.com uses 10%, local uses 100%.
+        random_state (int): Random seed for reproducible sampling.
+            Defaults to 42.
+
+    Returns:
+        pd.DataFrame: Processed survey DataFrame with added text columns
+            (Age_group, Edu_level_text, Marital_status_text, Smoked_bin,
+            Cannabis_bin, Drug_bin) and normalised Immigrant /
+            Aboriginal_identity labels.
     """
-    Load and process health survey data
-    
-    Parameters:
-    -----------
-    sample_fraction : float, optional
-        Fraction of data to sample (0.1 = 10%, 1.0 = 100%)
-        If None, auto-detect: Render.com uses 10%, local uses 100%
-    random_state : int, default 42
-        Random seed for reproducible sampling
-    """
-    
+
     # Auto-detect environment if not specified
     if sample_fraction is None:
         IS_RENDER = os.environ.get('RENDER') == 'true'
@@ -87,7 +96,20 @@ def load_data(sample_fraction=None, random_state=42):
 
 
 def get_filter_options(df):
-    """Get unique values for filter dropdowns"""
+    """Get unique values for filter dropdowns.
+
+    Extracts and orders the distinct category values for each sidebar
+    filter from the processed DataFrame, prepending 'All' to each list.
+
+    Args:
+        df (pd.DataFrame): Processed survey DataFrame returned by load_data().
+
+    Returns:
+        dict: Mapping of filter name to ordered list of option strings.
+            Keys: 'provinces', 'age_groups', 'genders', 'educations',
+            'maritals', 'incomes', 'immigrant', 'aboriginal',
+            'health_focus', 'compare_by'.
+    """
     
     # Helper function to extract unique values from category or object columns
     def get_unique(col):
