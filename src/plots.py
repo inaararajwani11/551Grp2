@@ -56,7 +56,7 @@ def get_compare_column(compare_by):
     """
     mapping = {
         'Income': 'Total_income',
-        'Education': 'Edu_level_text',  # 修正：使用 _text 版本
+        'Education': 'Edu_level_text',  
         'Age': 'Age_group',
         'Gender': 'Gender'
     }
