@@ -1,6 +1,6 @@
 # Contributing
 
-We welcome all contributions to this project! If you notice a bug or have a feature request, please [open up an issue](https://github.com/inaararajwani11/551Grp2/issues). All contributors must abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+We welcome all contributions to this project! If you notice a bug or have a feature request, please [open up an issue](https://github.com/inaararajwani11/healthcare-survey-dashboard/issues). All contributors must abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## How to Contribute
 

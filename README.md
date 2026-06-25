@@ -57,8 +57,8 @@ All plots support hover tooltips and coordinated filtering, allowing users to ex
 
 ```bash
 # Clone the repo
-git clone https://github.com/inaararajwani11/551Grp2.git
-cd 551Grp2
+git clone https://github.com/inaararajwani11/healthcare-survey-dashboard.git
+cd healthcare-survey-dashboard
 
 # Install dependencies
 pip install -r requirements.txt

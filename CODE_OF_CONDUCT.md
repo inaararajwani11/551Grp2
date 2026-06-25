@@ -32,7 +32,7 @@ diverse, inclusive, and healthy community.
 
 Instances of abusive, harassing, or otherwise unacceptable behaviour may be
 reported by opening an issue in the
-[GitHub repository](https://github.com/inaararajwani11/551Grp2/issues)
+[GitHub repository](https://github.com/inaararajwani11/healthcare-survey-dashboard/issues)
 or by contacting any of the project maintainers directly.
 
 All complaints will be reviewed and investigated promptly and fairly. The project
